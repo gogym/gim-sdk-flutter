@@ -31,3 +31,7 @@ export 'model/im_config.dart';
 
 // service 层
 export 'service/gim_im_service.dart';
+
+// rtc 层
+export 'rtc/rtc_types.dart';
+export 'rtc/rtc_engine.dart';
