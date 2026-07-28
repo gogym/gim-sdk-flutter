@@ -63,8 +63,8 @@ class RtcEngineCallback {
 /// - 权限管理（麦克风、摄像头）
 /// - 通话记录等业务逻辑
 class RtcEngine {
-  /// 当前用户 ID
-  final String localUserId;
+  /// 获取当前用户 ID 的回调（动态获取，避免初始化时 userId 尚未就绪）
+  final String Function() localUserId;
 
   /// 事件回调
   final RtcEngineCallback callback;
@@ -517,10 +517,15 @@ class RtcEngine {
   void _sendSignal(int signalType, String toUserId, Map<String, dynamic> payload, {String? callId}) {
     final body = proto.RtcSignal()
       ..signalType = signalType
-      ..fromUserId = localUserId
+      ..fromUserId = localUserId()
       ..toUserId = toUserId
       ..payload = jsonEncode(payload)
       ..callId = callId ?? _callId;
+
+    // 调试日志：验证 RtcSignal 序列化字段
+    final bodyBytes = body.writeToBuffer();
+    debugPrint('[RtcEngine] SEND signal: type=$signalType, from=${localUserId()}, '
+        'to=$toUserId, callId=${callId ?? _callId}, bodyBytes=${bodyBytes.length}');
 
     final packet = PacketCodec.create(Cmd.rtcSignal, body: body);
     callback.onSendSignal(packet);
