@@ -522,11 +522,6 @@ class RtcEngine {
       ..payload = jsonEncode(payload)
       ..callId = callId ?? _callId;
 
-    // 调试日志：验证 RtcSignal 序列化字段
-    final bodyBytes = body.writeToBuffer();
-    debugPrint('[RtcEngine] SEND signal: type=$signalType, from=${localUserId()}, '
-        'to=$toUserId, callId=${callId ?? _callId}, bodyBytes=${bodyBytes.length}');
-
     final packet = PacketCodec.create(Cmd.rtcSignal, body: body);
     callback.onSendSignal(packet);
   }
