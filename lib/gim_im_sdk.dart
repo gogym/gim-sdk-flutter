@@ -8,7 +8,7 @@
 /// 2. 创建 [GimImService] 并注册监听器
 /// 3. 调用 [GimImService.connect] 建立连接
 /// 4. 通过 [PacketCodec] 构建 Packet 后调用 [GimImService.send] 发送
-library gim_im_sdk;
+library gim_sdk_flutter;
 
 // protocol 层
 export 'protocol/ImProto.pb.dart';
