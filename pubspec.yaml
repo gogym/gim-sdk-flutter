@@ -1,4 +1,4 @@
-name: gim-sdk-flutter
+name: gim_sdk_flutter
 description: GIM IM SDK - Flutter 即时通讯核心能力 SDK，基于 TCP + Protobuf
 version: 0.1.0
 homepage: https://github.com/gogym/gim-sdk-flutter
