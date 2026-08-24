@@ -3,4 +3,7 @@
   <component name="DDGenerateAssetsClassConfig">
     <option name="path" value="null/lib" />
   </component>
+  <component name="FrameworkDetectionExcludesConfiguration">
+    <type id="android" />
+  </component>
 </project>

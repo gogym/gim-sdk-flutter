@@ -4,7 +4,7 @@
 //
 // @dart = 2.12
 
-// ignore_for_file: annotate_overrides, camel_case_types, comment_references
+// ignore_for_file: annotate_overrides, camel_case_types
 // ignore_for_file: constant_identifier_names, library_prefixes
 // ignore_for_file: non_constant_identifier_names, prefer_final_fields
 // ignore_for_file: unnecessary_import, unnecessary_this, unused_import
@@ -14,34 +14,8 @@ import 'dart:core' as $core;
 import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
-/// ===================== 统一信封 =====================
-/// 所有消息的外层包装，路由和协议层只关心 Packet
 class Packet extends $pb.GeneratedMessage {
-  factory Packet({
-    $core.int? cmd,
-    $fixnum.Int64? sequence,
-    $core.String? requestId,
-    $fixnum.Int64? timestamp,
-    $core.List<$core.int>? body,
-  }) {
-    final $result = create();
-    if (cmd != null) {
-      $result.cmd = cmd;
-    }
-    if (sequence != null) {
-      $result.sequence = sequence;
-    }
-    if (requestId != null) {
-      $result.requestId = requestId;
-    }
-    if (timestamp != null) {
-      $result.timestamp = timestamp;
-    }
-    if (body != null) {
-      $result.body = body;
-    }
-    return $result;
-  }
+  factory Packet() => create();
   Packet._() : super();
   factory Packet.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory Packet.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
@@ -122,25 +96,8 @@ class Packet extends $pb.GeneratedMessage {
   void clearBody() => clearField(5);
 }
 
-/// cmd = 1: 绑定请求（首包认证）
 class BindRequest extends $pb.GeneratedMessage {
-  factory BindRequest({
-    $core.String? userId,
-    $core.String? token,
-    $core.String? device,
-  }) {
-    final $result = create();
-    if (userId != null) {
-      $result.userId = userId;
-    }
-    if (token != null) {
-      $result.token = token;
-    }
-    if (device != null) {
-      $result.device = device;
-    }
-    return $result;
-  }
+  factory BindRequest() => create();
   BindRequest._() : super();
   factory BindRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory BindRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
@@ -201,25 +158,8 @@ class BindRequest extends $pb.GeneratedMessage {
   void clearDevice() => clearField(3);
 }
 
-/// cmd = 2: 绑定响应
 class BindResponse extends $pb.GeneratedMessage {
-  factory BindResponse({
-    $core.int? code,
-    $core.String? message,
-    $core.String? serverId,
-  }) {
-    final $result = create();
-    if (code != null) {
-      $result.code = code;
-    }
-    if (message != null) {
-      $result.message = message;
-    }
-    if (serverId != null) {
-      $result.serverId = serverId;
-    }
-    return $result;
-  }
+  factory BindResponse() => create();
   BindResponse._() : super();
   factory BindResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory BindResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
@@ -280,17 +220,8 @@ class BindResponse extends $pb.GeneratedMessage {
   void clearServerId() => clearField(3);
 }
 
-/// cmd = 3: 心跳请求
 class Heartbeat extends $pb.GeneratedMessage {
-  factory Heartbeat({
-    $fixnum.Int64? clientTime,
-  }) {
-    final $result = create();
-    if (clientTime != null) {
-      $result.clientTime = clientTime;
-    }
-    return $result;
-  }
+  factory Heartbeat() => create();
   Heartbeat._() : super();
   factory Heartbeat.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory Heartbeat.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
@@ -331,17 +262,8 @@ class Heartbeat extends $pb.GeneratedMessage {
   void clearClientTime() => clearField(1);
 }
 
-/// cmd = 4: 心跳响应
 class HeartbeatResponse extends $pb.GeneratedMessage {
-  factory HeartbeatResponse({
-    $fixnum.Int64? serverTime,
-  }) {
-    final $result = create();
-    if (serverTime != null) {
-      $result.serverTime = serverTime;
-    }
-    return $result;
-  }
+  factory HeartbeatResponse() => create();
   HeartbeatResponse._() : super();
   factory HeartbeatResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory HeartbeatResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
@@ -382,21 +304,8 @@ class HeartbeatResponse extends $pb.GeneratedMessage {
   void clearServerTime() => clearField(1);
 }
 
-/// cmd = 5: 踢人通知（服务端 → 客户端，被踢下线时发送）
 class KickNotify extends $pb.GeneratedMessage {
-  factory KickNotify({
-    $core.int? code,
-    $core.String? message,
-  }) {
-    final $result = create();
-    if (code != null) {
-      $result.code = code;
-    }
-    if (message != null) {
-      $result.message = message;
-    }
-    return $result;
-  }
+  factory KickNotify() => create();
   KickNotify._() : super();
   factory KickNotify.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory KickNotify.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
@@ -447,46 +356,8 @@ class KickNotify extends $pb.GeneratedMessage {
   void clearMessage() => clearField(2);
 }
 
-/// cmd = 10: 单聊消息（客户端 → 服务端）
-/// cmd = 11: 群聊消息（客户端 → 服务端）
 class ChatMessage extends $pb.GeneratedMessage {
-  factory ChatMessage({
-    $core.String? msgId,
-    $core.int? chatType,
-    $core.String? senderId,
-    $core.String? receiverId,
-    $core.int? contentType,
-    $core.String? content,
-    $core.String? conversationId,
-    $core.Map<$core.String, $core.String>? ext,
-  }) {
-    final $result = create();
-    if (msgId != null) {
-      $result.msgId = msgId;
-    }
-    if (chatType != null) {
-      $result.chatType = chatType;
-    }
-    if (senderId != null) {
-      $result.senderId = senderId;
-    }
-    if (receiverId != null) {
-      $result.receiverId = receiverId;
-    }
-    if (contentType != null) {
-      $result.contentType = contentType;
-    }
-    if (content != null) {
-      $result.content = content;
-    }
-    if (conversationId != null) {
-      $result.conversationId = conversationId;
-    }
-    if (ext != null) {
-      $result.ext.addAll(ext);
-    }
-    return $result;
-  }
+  factory ChatMessage() => create();
   ChatMessage._() : super();
   factory ChatMessage.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory ChatMessage.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
@@ -591,29 +462,8 @@ class ChatMessage extends $pb.GeneratedMessage {
   $core.Map<$core.String, $core.String> get ext => $_getMap(7);
 }
 
-/// cmd = 12: 服务端 ACK（服务器确认收到消息）
 class ServerAck extends $pb.GeneratedMessage {
-  factory ServerAck({
-    $core.String? clientRequestId,
-    $core.String? serverMsgId,
-    $core.int? code,
-    $fixnum.Int64? serverTime,
-  }) {
-    final $result = create();
-    if (clientRequestId != null) {
-      $result.clientRequestId = clientRequestId;
-    }
-    if (serverMsgId != null) {
-      $result.serverMsgId = serverMsgId;
-    }
-    if (code != null) {
-      $result.code = code;
-    }
-    if (serverTime != null) {
-      $result.serverTime = serverTime;
-    }
-    return $result;
-  }
+  factory ServerAck() => create();
   ServerAck._() : super();
   factory ServerAck.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory ServerAck.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
@@ -684,21 +534,8 @@ class ServerAck extends $pb.GeneratedMessage {
   void clearServerTime() => clearField(4);
 }
 
-/// cmd = 13: 送达 ACK（接收方客户端 → 服务端）
 class DeliveryAck extends $pb.GeneratedMessage {
-  factory DeliveryAck({
-    $core.String? msgId,
-    $core.String? fromUserId,
-  }) {
-    final $result = create();
-    if (msgId != null) {
-      $result.msgId = msgId;
-    }
-    if (fromUserId != null) {
-      $result.fromUserId = fromUserId;
-    }
-    return $result;
-  }
+  factory DeliveryAck() => create();
   DeliveryAck._() : super();
   factory DeliveryAck.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory DeliveryAck.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
@@ -749,21 +586,8 @@ class DeliveryAck extends $pb.GeneratedMessage {
   void clearFromUserId() => clearField(2);
 }
 
-/// cmd = 14: 已读回执
 class ReadReceipt extends $pb.GeneratedMessage {
-  factory ReadReceipt({
-    $core.String? conversationId,
-    $core.String? lastReadMsgId,
-  }) {
-    final $result = create();
-    if (conversationId != null) {
-      $result.conversationId = conversationId;
-    }
-    if (lastReadMsgId != null) {
-      $result.lastReadMsgId = lastReadMsgId;
-    }
-    return $result;
-  }
+  factory ReadReceipt() => create();
   ReadReceipt._() : super();
   factory ReadReceipt.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory ReadReceipt.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
@@ -814,25 +638,8 @@ class ReadReceipt extends $pb.GeneratedMessage {
   void clearLastReadMsgId() => clearField(2);
 }
 
-/// cmd = 15: 消息撤回请求（客户端 → 服务端）
 class MsgRecallRequest extends $pb.GeneratedMessage {
-  factory MsgRecallRequest({
-    $core.String? msgId,
-    $core.String? conversationId,
-    $core.int? chatType,
-  }) {
-    final $result = create();
-    if (msgId != null) {
-      $result.msgId = msgId;
-    }
-    if (conversationId != null) {
-      $result.conversationId = conversationId;
-    }
-    if (chatType != null) {
-      $result.chatType = chatType;
-    }
-    return $result;
-  }
+  factory MsgRecallRequest() => create();
   MsgRecallRequest._() : super();
   factory MsgRecallRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory MsgRecallRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
@@ -893,29 +700,8 @@ class MsgRecallRequest extends $pb.GeneratedMessage {
   void clearChatType() => clearField(3);
 }
 
-/// cmd = 16: 消息撤回通知（服务端 → 客户端，推送给对方）
 class MsgRecallNotify extends $pb.GeneratedMessage {
-  factory MsgRecallNotify({
-    $core.String? msgId,
-    $core.String? conversationId,
-    $core.String? operatorId,
-    $core.int? chatType,
-  }) {
-    final $result = create();
-    if (msgId != null) {
-      $result.msgId = msgId;
-    }
-    if (conversationId != null) {
-      $result.conversationId = conversationId;
-    }
-    if (operatorId != null) {
-      $result.operatorId = operatorId;
-    }
-    if (chatType != null) {
-      $result.chatType = chatType;
-    }
-    return $result;
-  }
+  factory MsgRecallNotify() => create();
   MsgRecallNotify._() : super();
   factory MsgRecallNotify.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory MsgRecallNotify.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
@@ -986,25 +772,8 @@ class MsgRecallNotify extends $pb.GeneratedMessage {
   void clearChatType() => clearField(4);
 }
 
-/// cmd = 20: 在线状态变更通知（服务端推送给关注方）
 class OnlineStatusNotify extends $pb.GeneratedMessage {
-  factory OnlineStatusNotify({
-    $core.String? userId,
-    $core.int? status,
-    $core.String? device,
-  }) {
-    final $result = create();
-    if (userId != null) {
-      $result.userId = userId;
-    }
-    if (status != null) {
-      $result.status = status;
-    }
-    if (device != null) {
-      $result.device = device;
-    }
-    return $result;
-  }
+  factory OnlineStatusNotify() => create();
   OnlineStatusNotify._() : super();
   factory OnlineStatusNotify.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory OnlineStatusNotify.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
@@ -1065,33 +834,8 @@ class OnlineStatusNotify extends $pb.GeneratedMessage {
   void clearDevice() => clearField(3);
 }
 
-/// cmd = 30: 好友申请通知（服务端推送）
 class FriendRequestNotify extends $pb.GeneratedMessage {
-  factory FriendRequestNotify({
-    $core.String? fromUserId,
-    $core.String? toUserId,
-    $core.String? nickname,
-    $core.String? avatar,
-    $core.String? message,
-  }) {
-    final $result = create();
-    if (fromUserId != null) {
-      $result.fromUserId = fromUserId;
-    }
-    if (toUserId != null) {
-      $result.toUserId = toUserId;
-    }
-    if (nickname != null) {
-      $result.nickname = nickname;
-    }
-    if (avatar != null) {
-      $result.avatar = avatar;
-    }
-    if (message != null) {
-      $result.message = message;
-    }
-    return $result;
-  }
+  factory FriendRequestNotify() => create();
   FriendRequestNotify._() : super();
   factory FriendRequestNotify.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory FriendRequestNotify.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
@@ -1102,6 +846,8 @@ class FriendRequestNotify extends $pb.GeneratedMessage {
     ..aOS(3, _omitFieldNames ? '' : 'nickname')
     ..aOS(4, _omitFieldNames ? '' : 'avatar')
     ..aOS(5, _omitFieldNames ? '' : 'message')
+    ..aOS(6, _omitFieldNames ? '' : 'requestId', protoName: 'requestId')
+    ..aOS(7, _omitFieldNames ? '' : 'logId', protoName: 'logId')
     ..hasRequiredFields = false
   ;
 
@@ -1170,27 +916,28 @@ class FriendRequestNotify extends $pb.GeneratedMessage {
   $core.bool hasMessage() => $_has(4);
   @$pb.TagNumber(5)
   void clearMessage() => clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.String get requestId => $_getSZ(5);
+  @$pb.TagNumber(6)
+  set requestId($core.String v) { $_setString(5, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasRequestId() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearRequestId() => clearField(6);
+
+  @$pb.TagNumber(7)
+  $core.String get logId => $_getSZ(6);
+  @$pb.TagNumber(7)
+  set logId($core.String v) { $_setString(6, v); }
+  @$pb.TagNumber(7)
+  $core.bool hasLogId() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearLogId() => clearField(7);
 }
 
-/// cmd = 31: 好友状态变更通知
 class FriendStatusNotify extends $pb.GeneratedMessage {
-  factory FriendStatusNotify({
-    $core.String? userId,
-    $core.String? toUserId,
-    $core.int? status,
-  }) {
-    final $result = create();
-    if (userId != null) {
-      $result.userId = userId;
-    }
-    if (toUserId != null) {
-      $result.toUserId = toUserId;
-    }
-    if (status != null) {
-      $result.status = status;
-    }
-    return $result;
-  }
+  factory FriendStatusNotify() => create();
   FriendStatusNotify._() : super();
   factory FriendStatusNotify.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory FriendStatusNotify.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
@@ -1251,29 +998,8 @@ class FriendStatusNotify extends $pb.GeneratedMessage {
   void clearStatus() => clearField(3);
 }
 
-/// cmd = 40: 群成员变更通知
 class GroupMemberNotify extends $pb.GeneratedMessage {
-  factory GroupMemberNotify({
-    $core.String? groupId,
-    $core.int? action,
-    $core.String? userId,
-    $core.String? operatorId,
-  }) {
-    final $result = create();
-    if (groupId != null) {
-      $result.groupId = groupId;
-    }
-    if (action != null) {
-      $result.action = action;
-    }
-    if (userId != null) {
-      $result.userId = userId;
-    }
-    if (operatorId != null) {
-      $result.operatorId = operatorId;
-    }
-    return $result;
-  }
+  factory GroupMemberNotify() => create();
   GroupMemberNotify._() : super();
   factory GroupMemberNotify.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory GroupMemberNotify.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
@@ -1344,33 +1070,8 @@ class GroupMemberNotify extends $pb.GeneratedMessage {
   void clearOperatorId() => clearField(4);
 }
 
-/// cmd = 41: 群信息/事件通知（群信息变更、公告、禁言、角色变更等）
 class GroupNotify extends $pb.GeneratedMessage {
-  factory GroupNotify({
-    $core.String? groupId,
-    $core.int? action,
-    $core.String? operatorId,
-    $core.String? targetUserId,
-    $core.String? content,
-  }) {
-    final $result = create();
-    if (groupId != null) {
-      $result.groupId = groupId;
-    }
-    if (action != null) {
-      $result.action = action;
-    }
-    if (operatorId != null) {
-      $result.operatorId = operatorId;
-    }
-    if (targetUserId != null) {
-      $result.targetUserId = targetUserId;
-    }
-    if (content != null) {
-      $result.content = content;
-    }
-    return $result;
-  }
+  factory GroupNotify() => create();
   GroupNotify._() : super();
   factory GroupNotify.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory GroupNotify.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
@@ -1451,33 +1152,8 @@ class GroupNotify extends $pb.GeneratedMessage {
   void clearContent() => clearField(5);
 }
 
-/// cmd = 42: 入群申请通知
 class GroupJoinRequestNotify extends $pb.GeneratedMessage {
-  factory GroupJoinRequestNotify({
-    $core.String? groupId,
-    $core.String? userId,
-    $core.String? operatorId,
-    $core.int? status,
-    $core.String? message,
-  }) {
-    final $result = create();
-    if (groupId != null) {
-      $result.groupId = groupId;
-    }
-    if (userId != null) {
-      $result.userId = userId;
-    }
-    if (operatorId != null) {
-      $result.operatorId = operatorId;
-    }
-    if (status != null) {
-      $result.status = status;
-    }
-    if (message != null) {
-      $result.message = message;
-    }
-    return $result;
-  }
+  factory GroupJoinRequestNotify() => create();
   GroupJoinRequestNotify._() : super();
   factory GroupJoinRequestNotify.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory GroupJoinRequestNotify.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
@@ -1558,33 +1234,8 @@ class GroupJoinRequestNotify extends $pb.GeneratedMessage {
   void clearMessage() => clearField(5);
 }
 
-/// cmd = 50: WebRTC 信令消息
 class RtcSignal extends $pb.GeneratedMessage {
-  factory RtcSignal({
-    $core.int? signalType,
-    $core.String? fromUserId,
-    $core.String? toUserId,
-    $core.String? payload,
-    $core.String? callId,
-  }) {
-    final $result = create();
-    if (signalType != null) {
-      $result.signalType = signalType;
-    }
-    if (fromUserId != null) {
-      $result.fromUserId = fromUserId;
-    }
-    if (toUserId != null) {
-      $result.toUserId = toUserId;
-    }
-    if (payload != null) {
-      $result.payload = payload;
-    }
-    if (callId != null) {
-      $result.callId = callId;
-    }
-    return $result;
-  }
+  factory RtcSignal() => create();
   RtcSignal._() : super();
   factory RtcSignal.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory RtcSignal.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
@@ -1665,33 +1316,8 @@ class RtcSignal extends $pb.GeneratedMessage {
   void clearCallId() => clearField(5);
 }
 
-/// cmd = 51: WebRTC 群聊信令消息
 class RtcGroup extends $pb.GeneratedMessage {
-  factory RtcGroup({
-    $core.int? signalType,
-    $core.String? fromUserId,
-    $core.String? groupId,
-    $core.String? payload,
-    $core.String? callId,
-  }) {
-    final $result = create();
-    if (signalType != null) {
-      $result.signalType = signalType;
-    }
-    if (fromUserId != null) {
-      $result.fromUserId = fromUserId;
-    }
-    if (groupId != null) {
-      $result.groupId = groupId;
-    }
-    if (payload != null) {
-      $result.payload = payload;
-    }
-    if (callId != null) {
-      $result.callId = callId;
-    }
-    return $result;
-  }
+  factory RtcGroup() => create();
   RtcGroup._() : super();
   factory RtcGroup.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory RtcGroup.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
