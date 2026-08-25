@@ -86,6 +86,7 @@ class GimImService {
       userId: config.userId,
       token: config.token,
       device: config.device,
+      deviceId: config.deviceId,
     );
   }
 

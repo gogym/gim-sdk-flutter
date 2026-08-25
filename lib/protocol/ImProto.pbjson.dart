@@ -1,13 +1,15 @@
+// This is a generated file - do not edit.
 //
-//  Generated code. Do not modify.
-//  source: ImProto.proto
-//
-// @dart = 2.12
+// Generated from ImProto.proto.
 
-// ignore_for_file: annotate_overrides, camel_case_types
-// ignore_for_file: constant_identifier_names, library_prefixes
-// ignore_for_file: non_constant_identifier_names, prefer_final_fields
-// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
+// @dart = 3.3
+
+// ignore_for_file: annotate_overrides, camel_case_types, comment_references
+// ignore_for_file: constant_identifier_names
+// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_relative_imports
+// ignore_for_file: unused_import
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -38,13 +40,14 @@ const BindRequest$json = {
     {'1': 'userId', '3': 1, '4': 1, '5': 9, '10': 'userId'},
     {'1': 'token', '3': 2, '4': 1, '5': 9, '10': 'token'},
     {'1': 'device', '3': 3, '4': 1, '5': 9, '10': 'device'},
+    {'1': 'deviceId', '3': 4, '4': 1, '5': 9, '10': 'deviceId'},
   ],
 };
 
 /// Descriptor for `BindRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List bindRequestDescriptor = $convert.base64Decode(
     'CgtCaW5kUmVxdWVzdBIWCgZ1c2VySWQYASABKAlSBnVzZXJJZBIUCgV0b2tlbhgCIAEoCVIFdG'
-    '9rZW4SFgoGZGV2aWNlGAMgASgJUgZkZXZpY2U=');
+    '9rZW4SFgoGZGV2aWNlGAMgASgJUgZkZXZpY2USGgoIZGV2aWNlSWQYBCABKAlSCGRldmljZUlk');
 
 @$core.Deprecated('Use bindResponseDescriptor instead')
 const BindResponse$json = {
@@ -110,7 +113,14 @@ const ChatMessage$json = {
     {'1': 'contentType', '3': 5, '4': 1, '5': 5, '10': 'contentType'},
     {'1': 'content', '3': 6, '4': 1, '5': 9, '10': 'content'},
     {'1': 'conversationId', '3': 7, '4': 1, '5': 9, '10': 'conversationId'},
-    {'1': 'ext', '3': 8, '4': 3, '5': 11, '6': '.gim.im.ChatMessage.ExtEntry', '10': 'ext'},
+    {
+      '1': 'ext',
+      '3': 8,
+      '4': 3,
+      '5': 11,
+      '6': '.gim.im.ChatMessage.ExtEntry',
+      '10': 'ext'
+    },
   ],
   '3': [ChatMessage_ExtEntry$json],
 };
@@ -350,4 +360,3 @@ final $typed_data.Uint8List rtcGroupDescriptor = $convert.base64Decode(
     'CghSdGNHcm91cBIeCgpzaWduYWxUeXBlGAEgASgFUgpzaWduYWxUeXBlEh4KCmZyb21Vc2VySW'
     'QYAiABKAlSCmZyb21Vc2VySWQSGAoHZ3JvdXBJZBgDIAEoCVIHZ3JvdXBJZBIYCgdwYXlsb2Fk'
     'GAQgASgJUgdwYXlsb2FkEhYKBmNhbGxJZBgFIAEoCVIGY2FsbElk');
-

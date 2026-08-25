@@ -65,6 +65,7 @@ class ImClient {
   String? _userId;
   String? _token;
   String? _device;
+  String? _deviceId;
   String? _serverId;
 
   ImClient({
@@ -91,14 +92,18 @@ class ImClient {
   // ====================== 连接管理 ======================
 
   /// 连接并绑定（首包认证）
+  ///
+  /// [deviceId] 设备唯一标识（客户端持久化UUID），用于区分同设备重连与异设备顶号
   Future<void> connect({
     required String userId,
     required String token,
     required String device,
+    String? deviceId,
   }) async {
     _userId = userId;
     _token = token;
     _device = device;
+    _deviceId = deviceId;
     _reconnectAttempts = 0;
     _disposed = false;
     _kicked = false;
@@ -232,7 +237,12 @@ class ImClient {
       );
 
       // 发送绑定请求
-      final bindReq = PacketCodec.buildBindReq(_userId!, _token!, _device!);
+      final bindReq = PacketCodec.buildBindReq(
+        _userId!,
+        _token!,
+        _device!,
+        deviceId: _deviceId,
+      );
       send(bindReq);
       debugPrint('[ImClient] sent bind request, userId=$_userId');
     } catch (e) {

@@ -61,11 +61,17 @@ class PacketCodec {
   // ====================== 业务消息构建 ======================
 
   /// 构建绑定请求 Packet
-  static proto.Packet buildBindReq(String userId, String token, String device) {
+  ///
+  /// [deviceId] 设备唯一标识（客户端持久化UUID），用于区分同设备重连与异设备顶号
+  static proto.Packet buildBindReq(String userId, String token, String device,
+      {String? deviceId}) {
     final body = proto.BindRequest()
       ..userId = userId
       ..token = token
       ..device = device;
+    if (deviceId != null && deviceId.isNotEmpty) {
+      body.deviceId = deviceId;
+    }
     return create(Cmd.bindReq, sequence: Int64.ZERO, body: body);
   }
 

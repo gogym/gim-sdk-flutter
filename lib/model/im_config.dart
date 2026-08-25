@@ -17,6 +17,9 @@ class ImConfig {
   /// 设备类型（mobile/desktop/web/pad）
   final String device;
 
+  /// 设备唯一标识（客户端持久化UUID），用于区分同设备重连与异设备顶号
+  final String? deviceId;
+
   /// 心跳间隔（默认 30 秒）
   final Duration heartbeatInterval;
 
@@ -38,6 +41,7 @@ class ImConfig {
     required this.userId,
     required this.token,
     required this.device,
+    this.deviceId,
     this.heartbeatInterval = const Duration(seconds: 30),
     this.heartbeatTimeout = const Duration(seconds: 10),
     this.reconnectBaseDelay = const Duration(seconds: 2),
