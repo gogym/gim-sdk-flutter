@@ -166,14 +166,14 @@ const DeliveryAck$json = {
   '1': 'DeliveryAck',
   '2': [
     {'1': 'msgId', '3': 1, '4': 1, '5': 9, '10': 'msgId'},
-    {'1': 'fromUserId', '3': 2, '4': 1, '5': 9, '10': 'fromUserId'},
+    {'1': 'senderId', '3': 2, '4': 1, '5': 9, '10': 'senderId'},
   ],
 };
 
 /// Descriptor for `DeliveryAck`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List deliveryAckDescriptor = $convert.base64Decode(
-    'CgtEZWxpdmVyeUFjaxIUCgVtc2dJZBgBIAEoCVIFbXNnSWQSHgoKZnJvbVVzZXJJZBgCIAEoCV'
-    'IKZnJvbVVzZXJJZA==');
+    'CgtEZWxpdmVyeUFjaxIUCgVtc2dJZBgBIAEoCVIFbXNnSWQSGgoIc2VuZGVySWQYAiABKAlSCH'
+    'NlbmRlcklk');
 
 @$core.Deprecated('Use readReceiptDescriptor instead')
 const ReadReceipt$json = {
@@ -240,8 +240,8 @@ final $typed_data.Uint8List onlineStatusNotifyDescriptor = $convert.base64Decode
 const FriendRequestNotify$json = {
   '1': 'FriendRequestNotify',
   '2': [
-    {'1': 'fromUserId', '3': 1, '4': 1, '5': 9, '10': 'fromUserId'},
-    {'1': 'toUserId', '3': 2, '4': 1, '5': 9, '10': 'toUserId'},
+    {'1': 'senderId', '3': 1, '4': 1, '5': 9, '10': 'senderId'},
+    {'1': 'receiverId', '3': 2, '4': 1, '5': 9, '10': 'receiverId'},
     {'1': 'nickname', '3': 3, '4': 1, '5': 9, '10': 'nickname'},
     {'1': 'avatar', '3': 4, '4': 1, '5': 9, '10': 'avatar'},
     {'1': 'message', '3': 5, '4': 1, '5': 9, '10': 'message'},
@@ -252,8 +252,8 @@ const FriendRequestNotify$json = {
 
 /// Descriptor for `FriendRequestNotify`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List friendRequestNotifyDescriptor = $convert.base64Decode(
-    'ChNGcmllbmRSZXF1ZXN0Tm90aWZ5Eh4KCmZyb21Vc2VySWQYASABKAlSCmZyb21Vc2VySWQSGg'
-    'oIdG9Vc2VySWQYAiABKAlSCHRvVXNlcklkEhoKCG5pY2tuYW1lGAMgASgJUghuaWNrbmFtZRIW'
+    'ChNGcmllbmRSZXF1ZXN0Tm90aWZ5EhoKCHNlbmRlcklkGAEgASgJUghzZW5kZXJJZBIeCgpyZW'
+    'NlaXZlcklkGAIgASgJUgpyZWNlaXZlcklkEhoKCG5pY2tuYW1lGAMgASgJUghuaWNrbmFtZRIW'
     'CgZhdmF0YXIYBCABKAlSBmF2YXRhchIYCgdtZXNzYWdlGAUgASgJUgdtZXNzYWdlEhwKCXJlcX'
     'Vlc3RJZBgGIAEoCVIJcmVxdWVzdElkEhQKBWxvZ0lkGAcgASgJUgVsb2dJZA==');
 
@@ -262,15 +262,15 @@ const FriendStatusNotify$json = {
   '1': 'FriendStatusNotify',
   '2': [
     {'1': 'userId', '3': 1, '4': 1, '5': 9, '10': 'userId'},
-    {'1': 'toUserId', '3': 2, '4': 1, '5': 9, '10': 'toUserId'},
+    {'1': 'receiverId', '3': 2, '4': 1, '5': 9, '10': 'receiverId'},
     {'1': 'status', '3': 3, '4': 1, '5': 5, '10': 'status'},
   ],
 };
 
 /// Descriptor for `FriendStatusNotify`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List friendStatusNotifyDescriptor = $convert.base64Decode(
-    'ChJGcmllbmRTdGF0dXNOb3RpZnkSFgoGdXNlcklkGAEgASgJUgZ1c2VySWQSGgoIdG9Vc2VySW'
-    'QYAiABKAlSCHRvVXNlcklkEhYKBnN0YXR1cxgDIAEoBVIGc3RhdHVz');
+    'ChJGcmllbmRTdGF0dXNOb3RpZnkSFgoGdXNlcklkGAEgASgJUgZ1c2VySWQSHgoKcmVjZWl2ZX'
+    'JJZBgCIAEoCVIKcmVjZWl2ZXJJZBIWCgZzdGF0dXMYAyABKAVSBnN0YXR1cw==');
 
 @$core.Deprecated('Use groupMemberNotifyDescriptor instead')
 const GroupMemberNotify$json = {
@@ -330,8 +330,8 @@ const RtcSignal$json = {
   '1': 'RtcSignal',
   '2': [
     {'1': 'signalType', '3': 1, '4': 1, '5': 5, '10': 'signalType'},
-    {'1': 'fromUserId', '3': 2, '4': 1, '5': 9, '10': 'fromUserId'},
-    {'1': 'toUserId', '3': 3, '4': 1, '5': 9, '10': 'toUserId'},
+    {'1': 'senderId', '3': 2, '4': 1, '5': 9, '10': 'senderId'},
+    {'1': 'receiverId', '3': 3, '4': 1, '5': 9, '10': 'receiverId'},
     {'1': 'payload', '3': 4, '4': 1, '5': 9, '10': 'payload'},
     {'1': 'callId', '3': 5, '4': 1, '5': 9, '10': 'callId'},
   ],
@@ -339,8 +339,8 @@ const RtcSignal$json = {
 
 /// Descriptor for `RtcSignal`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List rtcSignalDescriptor = $convert.base64Decode(
-    'CglSdGNTaWduYWwSHgoKc2lnbmFsVHlwZRgBIAEoBVIKc2lnbmFsVHlwZRIeCgpmcm9tVXNlck'
-    'lkGAIgASgJUgpmcm9tVXNlcklkEhoKCHRvVXNlcklkGAMgASgJUgh0b1VzZXJJZBIYCgdwYXls'
+    'CglSdGNTaWduYWwSHgoKc2lnbmFsVHlwZRgBIAEoBVIKc2lnbmFsVHlwZRIaCghzZW5kZXJJZB'
+    'gCIAEoCVIIc2VuZGVySWQSHgoKcmVjZWl2ZXJJZBgDIAEoCVIKcmVjZWl2ZXJJZBIYCgdwYXls'
     'b2FkGAQgASgJUgdwYXlsb2FkEhYKBmNhbGxJZBgFIAEoCVIGY2FsbElk');
 
 @$core.Deprecated('Use rtcGroupDescriptor instead')
@@ -348,7 +348,7 @@ const RtcGroup$json = {
   '1': 'RtcGroup',
   '2': [
     {'1': 'signalType', '3': 1, '4': 1, '5': 5, '10': 'signalType'},
-    {'1': 'fromUserId', '3': 2, '4': 1, '5': 9, '10': 'fromUserId'},
+    {'1': 'senderId', '3': 2, '4': 1, '5': 9, '10': 'senderId'},
     {'1': 'groupId', '3': 3, '4': 1, '5': 9, '10': 'groupId'},
     {'1': 'payload', '3': 4, '4': 1, '5': 9, '10': 'payload'},
     {'1': 'callId', '3': 5, '4': 1, '5': 9, '10': 'callId'},
@@ -357,6 +357,6 @@ const RtcGroup$json = {
 
 /// Descriptor for `RtcGroup`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List rtcGroupDescriptor = $convert.base64Decode(
-    'CghSdGNHcm91cBIeCgpzaWduYWxUeXBlGAEgASgFUgpzaWduYWxUeXBlEh4KCmZyb21Vc2VySW'
-    'QYAiABKAlSCmZyb21Vc2VySWQSGAoHZ3JvdXBJZBgDIAEoCVIHZ3JvdXBJZBIYCgdwYXlsb2Fk'
-    'GAQgASgJUgdwYXlsb2FkEhYKBmNhbGxJZBgFIAEoCVIGY2FsbElk');
+    'CghSdGNHcm91cBIeCgpzaWduYWxUeXBlGAEgASgFUgpzaWduYWxUeXBlEhoKCHNlbmRlcklkGA'
+    'IgASgJUghzZW5kZXJJZBIYCgdncm91cElkGAMgASgJUgdncm91cElkEhgKB3BheWxvYWQYBCAB'
+    'KAlSB3BheWxvYWQSFgoGY2FsbElkGAUgASgJUgZjYWxsSWQ=');

@@ -700,11 +700,11 @@ class ServerAck extends $pb.GeneratedMessage {
 class DeliveryAck extends $pb.GeneratedMessage {
   factory DeliveryAck({
     $core.String? msgId,
-    $core.String? fromUserId,
+    $core.String? senderId,
   }) {
     final result = create();
     if (msgId != null) result.msgId = msgId;
-    if (fromUserId != null) result.fromUserId = fromUserId;
+    if (senderId != null) result.senderId = senderId;
     return result;
   }
 
@@ -722,7 +722,7 @@ class DeliveryAck extends $pb.GeneratedMessage {
       package: const $pb.PackageName(_omitMessageNames ? '' : 'gim.im'),
       createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'msgId', protoName: 'msgId')
-    ..aOS(2, _omitFieldNames ? '' : 'fromUserId', protoName: 'fromUserId')
+    ..aOS(2, _omitFieldNames ? '' : 'senderId', protoName: 'senderId')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -754,13 +754,13 @@ class DeliveryAck extends $pb.GeneratedMessage {
   void clearMsgId() => $_clearField(1);
 
   @$pb.TagNumber(2)
-  $core.String get fromUserId => $_getSZ(1);
+  $core.String get senderId => $_getSZ(1);
   @$pb.TagNumber(2)
-  set fromUserId($core.String value) => $_setString(1, value);
+  set senderId($core.String value) => $_setString(1, value);
   @$pb.TagNumber(2)
-  $core.bool hasFromUserId() => $_has(1);
+  $core.bool hasSenderId() => $_has(1);
   @$pb.TagNumber(2)
-  void clearFromUserId() => $_clearField(2);
+  void clearSenderId() => $_clearField(2);
 }
 
 /// cmd = 14: 已读回执
@@ -1085,8 +1085,8 @@ class OnlineStatusNotify extends $pb.GeneratedMessage {
 /// cmd = 30: 好友申请通知（服务端推送）
 class FriendRequestNotify extends $pb.GeneratedMessage {
   factory FriendRequestNotify({
-    $core.String? fromUserId,
-    $core.String? toUserId,
+    $core.String? senderId,
+    $core.String? receiverId,
     $core.String? nickname,
     $core.String? avatar,
     $core.String? message,
@@ -1094,8 +1094,8 @@ class FriendRequestNotify extends $pb.GeneratedMessage {
     $core.String? logId,
   }) {
     final result = create();
-    if (fromUserId != null) result.fromUserId = fromUserId;
-    if (toUserId != null) result.toUserId = toUserId;
+    if (senderId != null) result.senderId = senderId;
+    if (receiverId != null) result.receiverId = receiverId;
     if (nickname != null) result.nickname = nickname;
     if (avatar != null) result.avatar = avatar;
     if (message != null) result.message = message;
@@ -1117,8 +1117,8 @@ class FriendRequestNotify extends $pb.GeneratedMessage {
       _omitMessageNames ? '' : 'FriendRequestNotify',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'gim.im'),
       createEmptyInstance: create)
-    ..aOS(1, _omitFieldNames ? '' : 'fromUserId', protoName: 'fromUserId')
-    ..aOS(2, _omitFieldNames ? '' : 'toUserId', protoName: 'toUserId')
+    ..aOS(1, _omitFieldNames ? '' : 'senderId', protoName: 'senderId')
+    ..aOS(2, _omitFieldNames ? '' : 'receiverId', protoName: 'receiverId')
     ..aOS(3, _omitFieldNames ? '' : 'nickname')
     ..aOS(4, _omitFieldNames ? '' : 'avatar')
     ..aOS(5, _omitFieldNames ? '' : 'message')
@@ -1146,22 +1146,22 @@ class FriendRequestNotify extends $pb.GeneratedMessage {
   static FriendRequestNotify? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get fromUserId => $_getSZ(0);
+  $core.String get senderId => $_getSZ(0);
   @$pb.TagNumber(1)
-  set fromUserId($core.String value) => $_setString(0, value);
+  set senderId($core.String value) => $_setString(0, value);
   @$pb.TagNumber(1)
-  $core.bool hasFromUserId() => $_has(0);
+  $core.bool hasSenderId() => $_has(0);
   @$pb.TagNumber(1)
-  void clearFromUserId() => $_clearField(1);
+  void clearSenderId() => $_clearField(1);
 
   @$pb.TagNumber(2)
-  $core.String get toUserId => $_getSZ(1);
+  $core.String get receiverId => $_getSZ(1);
   @$pb.TagNumber(2)
-  set toUserId($core.String value) => $_setString(1, value);
+  set receiverId($core.String value) => $_setString(1, value);
   @$pb.TagNumber(2)
-  $core.bool hasToUserId() => $_has(1);
+  $core.bool hasReceiverId() => $_has(1);
   @$pb.TagNumber(2)
-  void clearToUserId() => $_clearField(2);
+  void clearReceiverId() => $_clearField(2);
 
   @$pb.TagNumber(3)
   $core.String get nickname => $_getSZ(2);
@@ -1213,12 +1213,12 @@ class FriendRequestNotify extends $pb.GeneratedMessage {
 class FriendStatusNotify extends $pb.GeneratedMessage {
   factory FriendStatusNotify({
     $core.String? userId,
-    $core.String? toUserId,
+    $core.String? receiverId,
     $core.int? status,
   }) {
     final result = create();
     if (userId != null) result.userId = userId;
-    if (toUserId != null) result.toUserId = toUserId;
+    if (receiverId != null) result.receiverId = receiverId;
     if (status != null) result.status = status;
     return result;
   }
@@ -1237,7 +1237,7 @@ class FriendStatusNotify extends $pb.GeneratedMessage {
       package: const $pb.PackageName(_omitMessageNames ? '' : 'gim.im'),
       createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'userId', protoName: 'userId')
-    ..aOS(2, _omitFieldNames ? '' : 'toUserId', protoName: 'toUserId')
+    ..aOS(2, _omitFieldNames ? '' : 'receiverId', protoName: 'receiverId')
     ..aI(3, _omitFieldNames ? '' : 'status')
     ..hasRequiredFields = false;
 
@@ -1270,13 +1270,13 @@ class FriendStatusNotify extends $pb.GeneratedMessage {
   void clearUserId() => $_clearField(1);
 
   @$pb.TagNumber(2)
-  $core.String get toUserId => $_getSZ(1);
+  $core.String get receiverId => $_getSZ(1);
   @$pb.TagNumber(2)
-  set toUserId($core.String value) => $_setString(1, value);
+  set receiverId($core.String value) => $_setString(1, value);
   @$pb.TagNumber(2)
-  $core.bool hasToUserId() => $_has(1);
+  $core.bool hasReceiverId() => $_has(1);
   @$pb.TagNumber(2)
-  void clearToUserId() => $_clearField(2);
+  void clearReceiverId() => $_clearField(2);
 
   @$pb.TagNumber(3)
   $core.int get status => $_getIZ(2);
@@ -1590,15 +1590,15 @@ class GroupJoinRequestNotify extends $pb.GeneratedMessage {
 class RtcSignal extends $pb.GeneratedMessage {
   factory RtcSignal({
     $core.int? signalType,
-    $core.String? fromUserId,
-    $core.String? toUserId,
+    $core.String? senderId,
+    $core.String? receiverId,
     $core.String? payload,
     $core.String? callId,
   }) {
     final result = create();
     if (signalType != null) result.signalType = signalType;
-    if (fromUserId != null) result.fromUserId = fromUserId;
-    if (toUserId != null) result.toUserId = toUserId;
+    if (senderId != null) result.senderId = senderId;
+    if (receiverId != null) result.receiverId = receiverId;
     if (payload != null) result.payload = payload;
     if (callId != null) result.callId = callId;
     return result;
@@ -1618,8 +1618,8 @@ class RtcSignal extends $pb.GeneratedMessage {
       package: const $pb.PackageName(_omitMessageNames ? '' : 'gim.im'),
       createEmptyInstance: create)
     ..aI(1, _omitFieldNames ? '' : 'signalType', protoName: 'signalType')
-    ..aOS(2, _omitFieldNames ? '' : 'fromUserId', protoName: 'fromUserId')
-    ..aOS(3, _omitFieldNames ? '' : 'toUserId', protoName: 'toUserId')
+    ..aOS(2, _omitFieldNames ? '' : 'senderId', protoName: 'senderId')
+    ..aOS(3, _omitFieldNames ? '' : 'receiverId', protoName: 'receiverId')
     ..aOS(4, _omitFieldNames ? '' : 'payload')
     ..aOS(5, _omitFieldNames ? '' : 'callId', protoName: 'callId')
     ..hasRequiredFields = false;
@@ -1652,22 +1652,22 @@ class RtcSignal extends $pb.GeneratedMessage {
   void clearSignalType() => $_clearField(1);
 
   @$pb.TagNumber(2)
-  $core.String get fromUserId => $_getSZ(1);
+  $core.String get senderId => $_getSZ(1);
   @$pb.TagNumber(2)
-  set fromUserId($core.String value) => $_setString(1, value);
+  set senderId($core.String value) => $_setString(1, value);
   @$pb.TagNumber(2)
-  $core.bool hasFromUserId() => $_has(1);
+  $core.bool hasSenderId() => $_has(1);
   @$pb.TagNumber(2)
-  void clearFromUserId() => $_clearField(2);
+  void clearSenderId() => $_clearField(2);
 
   @$pb.TagNumber(3)
-  $core.String get toUserId => $_getSZ(2);
+  $core.String get receiverId => $_getSZ(2);
   @$pb.TagNumber(3)
-  set toUserId($core.String value) => $_setString(2, value);
+  set receiverId($core.String value) => $_setString(2, value);
   @$pb.TagNumber(3)
-  $core.bool hasToUserId() => $_has(2);
+  $core.bool hasReceiverId() => $_has(2);
   @$pb.TagNumber(3)
-  void clearToUserId() => $_clearField(3);
+  void clearReceiverId() => $_clearField(3);
 
   @$pb.TagNumber(4)
   $core.String get payload => $_getSZ(3);
@@ -1692,14 +1692,14 @@ class RtcSignal extends $pb.GeneratedMessage {
 class RtcGroup extends $pb.GeneratedMessage {
   factory RtcGroup({
     $core.int? signalType,
-    $core.String? fromUserId,
+    $core.String? senderId,
     $core.String? groupId,
     $core.String? payload,
     $core.String? callId,
   }) {
     final result = create();
     if (signalType != null) result.signalType = signalType;
-    if (fromUserId != null) result.fromUserId = fromUserId;
+    if (senderId != null) result.senderId = senderId;
     if (groupId != null) result.groupId = groupId;
     if (payload != null) result.payload = payload;
     if (callId != null) result.callId = callId;
@@ -1720,7 +1720,7 @@ class RtcGroup extends $pb.GeneratedMessage {
       package: const $pb.PackageName(_omitMessageNames ? '' : 'gim.im'),
       createEmptyInstance: create)
     ..aI(1, _omitFieldNames ? '' : 'signalType', protoName: 'signalType')
-    ..aOS(2, _omitFieldNames ? '' : 'fromUserId', protoName: 'fromUserId')
+    ..aOS(2, _omitFieldNames ? '' : 'senderId', protoName: 'senderId')
     ..aOS(3, _omitFieldNames ? '' : 'groupId', protoName: 'groupId')
     ..aOS(4, _omitFieldNames ? '' : 'payload')
     ..aOS(5, _omitFieldNames ? '' : 'callId', protoName: 'callId')
@@ -1754,13 +1754,13 @@ class RtcGroup extends $pb.GeneratedMessage {
   void clearSignalType() => $_clearField(1);
 
   @$pb.TagNumber(2)
-  $core.String get fromUserId => $_getSZ(1);
+  $core.String get senderId => $_getSZ(1);
   @$pb.TagNumber(2)
-  set fromUserId($core.String value) => $_setString(1, value);
+  set senderId($core.String value) => $_setString(1, value);
   @$pb.TagNumber(2)
-  $core.bool hasFromUserId() => $_has(1);
+  $core.bool hasSenderId() => $_has(1);
   @$pb.TagNumber(2)
-  void clearFromUserId() => $_clearField(2);
+  void clearSenderId() => $_clearField(2);
 
   @$pb.TagNumber(3)
   $core.String get groupId => $_getSZ(2);

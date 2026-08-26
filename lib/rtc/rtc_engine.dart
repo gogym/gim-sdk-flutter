@@ -34,8 +34,8 @@ class RtcEngineCallback {
   /// 每秒通话计时（[seconds] 为已通话秒数）
   final void Function(int seconds) onCallDurationTick;
 
-  /// 收到来电（[fromUserId] 来电方，[callId] 通话ID）
-  final void Function(String fromUserId, String callId) onIncomingCall;
+  /// 收到来电（[senderId] 来电方，[callId] 通话ID）
+  final void Function(String senderId, String callId) onIncomingCall;
 
   RtcEngineCallback({
     required this.onSendSignal,
@@ -253,7 +253,7 @@ class RtcEngine {
 
   /// 处理收到的 RTC 信令（由项目层从 IM 事件中转调）
   void handleSignal(proto.RtcSignal signal) {
-    debugPrint('[RtcEngine] signal type=${signal.signalType} from=${signal.fromUserId} callId=${signal.callId}');
+    debugPrint('[RtcEngine] signal type=${signal.signalType} from=${signal.senderId} callId=${signal.callId}');
 
     switch (signal.signalType) {
       case RtcSignalType.callRequest:
@@ -287,7 +287,7 @@ class RtcEngine {
 
   /// 收到呼叫请求（被叫方）
   void _onCallRequest(proto.RtcSignal signal) {
-    _remoteUserId = signal.fromUserId;
+    _remoteUserId = signal.senderId;
     _callId = signal.callId;
     _callType = RtcCallType.video;
     _isInitiator = false;
@@ -301,7 +301,7 @@ class RtcEngine {
     _updateState(RtcCallState.ringing);
 
     // 通知项目层展示来电 UI
-    callback.onIncomingCall(signal.fromUserId, signal.callId);
+    callback.onIncomingCall(signal.senderId, signal.callId);
   }
 
   /// 收到接听（主叫方）→ 创建 PeerConnection 并发送 Offer
@@ -369,11 +369,11 @@ class RtcEngine {
     final answer = await _peerConnection!.createAnswer();
     await _peerConnection!.setLocalDescription(answer);
 
-    _sendSignal(RtcSignalType.answer, signal.fromUserId, {
+    _sendSignal(RtcSignalType.answer, signal.senderId, {
       'sdp': answer.sdp,
     }, callId: _callId);
 
-    debugPrint('[RtcEngine] Answer sent to ${signal.fromUserId}');
+    debugPrint('[RtcEngine] Answer sent to ${signal.senderId}');
   }
 
   /// 主叫方：收到 Answer，设置远端描述
@@ -514,11 +514,11 @@ class RtcEngine {
   // ====================== 内部工具 ======================
 
   /// 发送信令
-  void _sendSignal(int signalType, String toUserId, Map<String, dynamic> payload, {String? callId}) {
+  void _sendSignal(int signalType, String receiverId, Map<String, dynamic> payload, {String? callId}) {
     final body = proto.RtcSignal()
       ..signalType = signalType
-      ..fromUserId = localUserId()
-      ..toUserId = toUserId
+      ..senderId = localUserId()
+      ..receiverId = receiverId
       ..payload = jsonEncode(payload)
       ..callId = callId ?? _callId;
 

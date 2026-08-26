@@ -133,10 +133,10 @@ class PacketCodec {
   }
 
   /// 构建送达 ACK Packet
-  static proto.Packet buildDeliveryAck(String msgId, String fromUserId) {
+  static proto.Packet buildDeliveryAck(String msgId, String senderId) {
     final body = proto.DeliveryAck()
       ..msgId = msgId
-      ..fromUserId = fromUserId;
+      ..senderId = senderId;
     return create(Cmd.deliveryAck, sequence: Int64.ZERO, body: body);
   }
 
