@@ -533,6 +533,10 @@ class RtcEngine {
   }
 
   /// 结束通话
+  ///
+  /// 注意回调顺序：必须先通知 onCallEnded（结束原因已确定，
+  /// 项目层依赖此时保存通话记录），再通知状态变为 ended，
+  /// 否则项目层监听 ended 时拿不到结束原因/通话记录。
   void _endCall() {
     _callTimer?.cancel();
 
@@ -540,8 +544,8 @@ class RtcEngine {
       _endReason = RtcCallEndReason.failed;
     }
 
-    _updateState(RtcCallState.ended);
     callback.onCallEnded(_endReason);
+    _updateState(RtcCallState.ended);
     _cleanup();
 
     // 延迟恢复空闲状态
