@@ -16,6 +16,7 @@ import 'rtc_types.dart';
 /// - [onCallStateChanged] — 通话状态变更通知
 /// - [onCallEnded] — 通话结束通知（含结束原因）
 /// - [onRemoteStreamReceived] — 远端媒体流到达
+/// - [onLocalStreamReady] — 本地媒体流就绪（getUserMedia 完成后触发）
 /// - [onCallDurationTick] — 每秒通话计时
 /// - [onIncomingCall] — 收到来电（被叫方，需展示来电 UI）
 class RtcEngineCallback {
@@ -31,6 +32,9 @@ class RtcEngineCallback {
   /// 远端媒体流到达
   final void Function(webrtc.MediaStream stream) onRemoteStreamReceived;
 
+  /// 本地媒体流就绪（getUserMedia 完成后触发，供项目层绑定本地预览）
+  final void Function(webrtc.MediaStream stream) onLocalStreamReady;
+
   /// 每秒通话计时（[seconds] 为已通话秒数）
   final void Function(int seconds) onCallDurationTick;
 
@@ -42,6 +46,7 @@ class RtcEngineCallback {
     required this.onCallStateChanged,
     required this.onCallEnded,
     required this.onRemoteStreamReceived,
+    required this.onLocalStreamReady,
     required this.onCallDurationTick,
     required this.onIncomingCall,
   });
@@ -506,6 +511,8 @@ class RtcEngine {
     };
     _localStream = await webrtc.navigator.mediaDevices.getUserMedia(constraints);
     _mediaReady = true;
+    // 通知项目层本地流已就绪（避免依赖调用时序获取预览流）
+    callback.onLocalStreamReady(_localStream!);
     debugPrint('[RtcEngine] Local media acquired: '
         'audio=${_localStream!.getAudioTracks().length}, '
         'video=${_localStream!.getVideoTracks().length}');
