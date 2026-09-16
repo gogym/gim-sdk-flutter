@@ -262,9 +262,13 @@ class RtcEngine {
 
     switch (signal.signalType) {
       case RtcSignalType.callRequest:
+        // 诊断日志：服务端中转时是否填充 callId / 下发 turn 凭证
+        debugPrint('[RtcEngine] CALL_REQUEST raw payload: ${signal.payload}');
         _onCallRequest(signal);
         break;
       case RtcSignalType.callAccept:
+        // 诊断日志：服务端中转时是否填充 callId / 下发 turn 凭证
+        debugPrint('[RtcEngine] CALL_ACCEPT raw payload: ${signal.payload}');
         _onCallAccept(signal);
         break;
       case RtcSignalType.callReject:
