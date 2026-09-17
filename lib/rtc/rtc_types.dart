@@ -20,7 +20,9 @@ enum RtcCallState {
 ///
 /// 与 ImProto.proto 中 RtcSignal 注释保持一致：
 /// 1=offer, 2=answer, 3=iceCandidate,
-/// 4=callRequest, 5=callAccept, 6=callReject, 7=callCancel, 8=callHangup
+/// 4=callRequest, 5=callAccept, 6=callReject, 7=callCancel, 8=callHangup,
+/// 9=callAck（服务端→主叫：回传服务端生成的 callId）
+/// 10~19 预留；20~27 群通话生命周期；100=mediaState（媒体开关，独立高位、与群通话共用）
 class RtcSignalType {
   static const int offer = 1;
   static const int answer = 2;
@@ -30,6 +32,7 @@ class RtcSignalType {
   static const int callReject = 6;      // 拒绝
   static const int callCancel = 7;      // 取消呼叫
   static const int callHangup = 8;      // 挂断
+  static const int callAck = 9;         // 服务端回传 callId 给主叫
 }
 
 /// 通话结束原因

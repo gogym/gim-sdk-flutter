@@ -153,7 +153,7 @@ class RtcEngine {
     _callType = type;
     _isInitiator = true;
     _endReason = RtcCallEndReason.none;
-    _callId = ''; // callId 由服务端生成，通过 callAccept 回传
+    _callId = ''; // callId 由服务端生成，通过 callAck 回传（未到达前 cancel 由服务端按占用会话兜底）
 
     _updateState(RtcCallState.calling);
 
@@ -271,6 +271,9 @@ class RtcEngine {
         debugPrint('[RtcEngine] CALL_ACCEPT raw payload: ${signal.payload}');
         _onCallAccept(signal);
         break;
+      case RtcSignalType.callAck:
+        _onCallAck(signal);
+        break;
       case RtcSignalType.callReject:
         _onCallReject(signal);
         break;
@@ -326,6 +329,18 @@ class RtcEngine {
 
     _updateState(RtcCallState.connecting);
     _createAndSendOffer();
+  }
+
+  /// 收到服务端呼叫确认（主叫方）→ 记录服务端生成的权威 callId
+  ///
+  /// 主叫 startCall 时 callId 留空，由服务端生成后经 CALL_ACK 回传；
+  /// 存下后 cancel/hangup 等信令即可携带正确 callId。
+  /// 兼容：若 cancel 先于 CALL_ACK 到达，服务端会按主叫占用会话兜底解析，不影响结束。
+  void _onCallAck(proto.RtcSignal signal) {
+    if (signal.callId.isNotEmpty) {
+      _callId = signal.callId;
+      debugPrint('[RtcEngine] CALL_ACK received, callId=$_callId');
+    }
   }
 
   /// 收到拒绝
