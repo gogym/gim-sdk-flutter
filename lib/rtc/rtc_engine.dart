@@ -19,6 +19,7 @@ import 'rtc_types.dart';
 /// - [onLocalStreamReady] — 本地媒体流就绪（getUserMedia 完成后触发）
 /// - [onCallDurationTick] — 每秒通话计时
 /// - [onIncomingCall] — 收到来电（被叫方，需展示来电 UI）
+/// - [onRemoteMediaStateChanged] — 远端摄像头/麦克风开关变化（用于对端 UI 提示）
 class RtcEngineCallback {
   /// 引擎需要发送信令包（项目层通过 IM 通道发送 [packet]）
   final void Function(proto.Packet packet) onSendSignal;
@@ -41,6 +42,11 @@ class RtcEngineCallback {
   /// 收到来电（[senderId] 来电方，[callId] 通话ID）
   final void Function(String senderId, String callId) onIncomingCall;
 
+  /// 远端媒体开关状态变更（对端切换摄像头/麦克风）
+  ///
+  /// 参数为 null 表示该项本次未变化，保留原状态；与 Android SDK 协议一致。
+  final void Function(bool? cameraEnabled, bool? micEnabled) onRemoteMediaStateChanged;
+
   RtcEngineCallback({
     required this.onSendSignal,
     required this.onCallStateChanged,
@@ -49,6 +55,7 @@ class RtcEngineCallback {
     required this.onLocalStreamReady,
     required this.onCallDurationTick,
     required this.onIncomingCall,
+    required this.onRemoteMediaStateChanged,
   });
 }
 
@@ -201,6 +208,8 @@ class RtcEngine {
   }
 
   /// 切换摄像头开关（通话中实时生效）
+  ///
+  /// 切换后向对端广播媒体状态信令（mediaState），对端 UI 据此显示禁用图标。
   void toggleCamera() {
     final stream = _localStream;
     if (stream == null) return;
@@ -209,9 +218,13 @@ class RtcEngine {
     for (final track in videoTracks) {
       track.enabled = !track.enabled;
     }
+    // 以第一个轨道的新状态作为本端摄像头开关，通知对端
+    _sendMediaState(camera: videoTracks.first.enabled);
   }
 
   /// 切换麦克风开关（通话中实时生效）
+  ///
+  /// 切换后向对端广播媒体状态信令（mediaState），对端 UI 据此显示静音胶囊。
   void toggleMicrophone() {
     final stream = _localStream;
     if (stream == null) return;
@@ -220,6 +233,8 @@ class RtcEngine {
     for (final track in audioTracks) {
       track.enabled = !track.enabled;
     }
+    // 以第一个轨道的新状态作为本端麦克风开关，通知对端
+    _sendMediaState(mic: audioTracks.first.enabled);
   }
 
   /// 切换前后摄像头
@@ -292,6 +307,9 @@ class RtcEngine {
       case RtcSignalType.iceCandidate:
         _onIceCandidate(signal);
         break;
+      case RtcSignalType.mediaState:
+        _onMediaState(signal);
+        break;
     }
   }
 
@@ -361,6 +379,42 @@ class RtcEngine {
   void _onCallHangup() {
     _endReason = RtcCallEndReason.normal;
     _endCall();
+  }
+
+  /// 收到对端媒体开关状态（通话中对端切换摄像头/麦克风）
+  ///
+  /// 过期信令（callId 不匹配）丢弃，防止串线到新通话。
+  void _onMediaState(proto.RtcSignal signal) {
+    if (signal.callId.isNotEmpty && signal.callId != _callId) {
+      debugPrint('[RtcEngine] stale MEDIA_STATE ignored, callId=${signal.callId} != $_callId');
+      return;
+    }
+    if (signal.payload.isEmpty) return;
+    try {
+      final payload = jsonDecode(signal.payload) as Map<String, dynamic>;
+      final hasCamera = payload.containsKey('camera');
+      final hasMic = payload.containsKey('mic');
+      if (!hasCamera && !hasMic) return;
+      final camera = hasCamera ? payload['camera'] as bool? : null;
+      final mic = hasMic ? payload['mic'] as bool? : null;
+      debugPrint('[RtcEngine] Remote media state: camera=$camera, mic=$mic');
+      callback.onRemoteMediaStateChanged(camera, mic);
+    } catch (e) {
+      debugPrint('[RtcEngine] parse media state error: $e');
+    }
+  }
+
+  /// 通知对端本端媒体开关状态（payload 只带变化项）
+  ///
+  /// 与 Android SDK `sendMediaState` 协议一致：`{"camera": bool}` / `{"mic": bool}`。
+  void _sendMediaState({bool? camera, bool? mic}) {
+    if (camera == null && mic == null) return;
+    if (_remoteUserId.isEmpty) return;
+    final payload = <String, dynamic>{};
+    if (camera != null) payload['camera'] = camera;
+    if (mic != null) payload['mic'] = mic;
+    _sendSignal(RtcSignalType.mediaState, _remoteUserId, payload, callId: _callId);
+    debugPrint('[RtcEngine] Media state sent: camera=$camera, mic=$mic');
   }
 
   // ====================== WebRTC 核心流程 ======================

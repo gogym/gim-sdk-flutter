@@ -33,6 +33,12 @@ class RtcSignalType {
   static const int callCancel = 7;      // 取消呼叫
   static const int callHangup = 8;      // 挂断
   static const int callAck = 9;         // 服务端回传 callId 给主叫
+
+  /// 媒体开关状态（独立高位编号，1:1 与群通话共用，与两侧生命周期号段隔离）
+  ///
+  /// payload 只携带发生变化的项：`{"camera": bool}` 或 `{"mic": bool}`，
+  /// 与 Android SDK 协议保持一致。
+  static const int mediaState = 100;
 }
 
 /// 通话结束原因
