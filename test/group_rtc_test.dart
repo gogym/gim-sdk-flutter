@@ -1,3 +1,7 @@
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:gim_sdk_flutter/gim_im_sdk.dart';
@@ -196,6 +200,110 @@ void main() {
         'username': 'user',
         'credential': 'cred',
       });
+    });
+  });
+
+  group('GroupRtcEngine 连接失败收口', () {
+    GroupRtcEngine buildEngine(List<RtcGroup> sent) {
+      return GroupRtcEngine(
+        localUserId: () => 'userB',
+        callback: GroupRtcEngineCallback(
+          onSendGroupSignal: (packet) =>
+              sent.add(PacketCodec.parseRtcGroup(packet)),
+          onSendMediaSignal: (_) {},
+          onCallStateChanged: (_) {},
+          onIncomingGroupCall: (_, __) {},
+          onRoomStateChanged: (_) {},
+          onLocalStreamReady: (_) {},
+          onLocalVideoTrack: (_) {},
+          onRemoteMemberMedia: (_) {},
+          onRemoteMemberRemoved: (_) {},
+          onMemberMediaStateChanged: (_, __, ___) {},
+          onMembersUpdated: () {},
+          onCallEnded: (_) {},
+          onCallDurationTick: (_) {},
+          onError: (_) {},
+        ),
+      );
+    }
+
+    test('connecting 超时自动 leave(reason=failed) 并本地收口', () {
+      fakeAsync((async) {
+        GroupRtcEngine.connectTimeout = const Duration(milliseconds: 100);
+        final sent = <RtcGroup>[];
+        final engine = buildEngine(sent);
+
+        // 来电置为 ringing（写入 roomId，使 acceptGroupCall 可用）
+        final invite = PacketCodec.buildRtcGroup(
+          signalType: GroupSignalType.groupCallInvite,
+          senderId: 'userA',
+          groupId: 'group-1',
+          callId: 'call-1',
+          roomId: 'room-1',
+          payload: jsonEncode({
+            'callType': 'video',
+            'groupId': 'group-1',
+            'initiatorId': 'userA',
+            'mode': 'mesh',
+          }),
+        );
+        engine.handleGroupSignal(PacketCodec.parseRtcGroup(invite));
+        expect(engine.state, GroupCallState.ringing);
+
+        unawaited(engine.acceptGroupCall());
+        async.elapse(const Duration(milliseconds: 10));
+        expect(engine.state, GroupCallState.connecting);
+
+        // 未收到任何媒体连接就绪事件，超时触发主动 leave
+        async.elapse(const Duration(milliseconds: 200));
+        expect(engine.state, GroupCallState.ended);
+        expect(engine.endReason, GroupCallEndReason.failed);
+        final leaves = sent
+            .where((s) => s.signalType == GroupSignalType.groupCallLeave)
+            .toList();
+        expect(leaves.length, 1);
+        expect(leaves.first.callId, 'call-1');
+        expect(leaves.first.roomId, 'room-1');
+        expect(leaves.first.payload, '{"reason":"failed"}');
+      });
+    });
+
+    test('SFU 接入信息缺失时上报 transport broken 主动 leave 收口', () async {
+      final sent = <RtcGroup>[];
+      final engine = buildEngine(sent);
+
+      // SFU 房间但 sfuUrl/sfuToken 为空 → 传输层立即上报 broken
+      final roomState = PacketCodec.buildRtcGroup(
+        signalType: GroupSignalType.roomState,
+        senderId: 'server',
+        groupId: 'group-1',
+        callId: 'call-1',
+        roomId: 'room-1',
+        payload: jsonEncode({
+          'roomId': 'room-1',
+          'callId': 'call-1',
+          'groupId': 'group-1',
+          'mode': 'sfu',
+          'callType': 'video',
+          'initiatorId': 'userA',
+          'members': [
+            {'userId': 'userA', 'status': 'joined'},
+          ],
+        }),
+      );
+      engine.handleGroupSignal(PacketCodec.parseRtcGroup(roomState));
+
+      // 等待 roomState 异步链路（建 transport → broken → leave）完成
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      expect(engine.state, GroupCallState.ended);
+      expect(engine.endReason, GroupCallEndReason.failed);
+      final leaves = sent
+          .where((s) => s.signalType == GroupSignalType.groupCallLeave)
+          .toList();
+      expect(leaves.length, 1);
+      expect(leaves.first.payload, '{"reason":"failed"}');
+      await engine.dispose();
     });
   });
 }

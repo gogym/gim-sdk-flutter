@@ -74,6 +74,14 @@ class GroupRtcEngineCallback {
 /// 4. mediaState(100) 上报开关 → 服务端广播 participantNotify(26, media)
 /// 5. leave(24)/end(25) → 广播成员变更/通话结束
 class GroupRtcEngine {
+  /// 进入 connecting 后未建联的连接超时时长
+  ///
+  /// 超时仍未收到任何媒体连接就绪事件，则以 failed 主动 leave 并本地收口，
+  /// 避免本端永远停留在连接中且其他成员无感知（服务端无法感知 Mesh 媒体层，
+  /// 生命周期信令是唯一通知渠道）。
+  /// 可变静态字段仅为单元测试可注入短超时。
+  static Duration connectTimeout = const Duration(seconds: 30);
+
   /// 当前用户 ID（动态获取，避免初始化时未就绪）
   final String Function() localUserId;
 
@@ -106,6 +114,9 @@ class GroupRtcEngine {
 
   Timer? _callTimer;
   int _callDuration = 0;
+
+  /// 连接超时计时器（connecting 态启动，媒体就绪或结束后取消）
+  Timer? _connectTimer;
 
   // ====================== Getters ======================
 
@@ -145,6 +156,7 @@ class GroupRtcEngine {
   /// 释放所有资源
   Future<void> dispose() async {
     _callTimer?.cancel();
+    _connectTimer?.cancel();
     await _cleanup();
   }
 
@@ -183,6 +195,7 @@ class GroupRtcEngine {
       return;
     }
     _updateState(GroupCallState.connecting);
+    _startConnectTimer();
     _sendGroupSignal(GroupSignalType.groupCallJoin);
     debugPrint('[GroupRtcEngine] group call joined: room=$_roomId');
   }
@@ -329,6 +342,7 @@ class GroupRtcEngine {
     _mergeMembers(roomState.members);
 
     _updateState(GroupCallState.connecting);
+    _startConnectTimer();
     callback.onRoomStateChanged.call(roomState);
     callback.onMembersUpdated.call();
 
@@ -458,6 +472,7 @@ class GroupRtcEngine {
       onRemoteMemberRemoved: callback.onRemoteMemberRemoved.call,
       onLocalVideoTrack: callback.onLocalVideoTrack.call,
       onMediaConnected: _onMediaConnected,
+      onTransportBroken: _onTransportBroken,
       onError: callback.onError.call,
     );
 
@@ -483,10 +498,21 @@ class GroupRtcEngine {
 
   /// 媒体连接就绪（首个对端连通 / SFU 房间连接成功）→ 启动计时
   void _onMediaConnected() {
+    _connectTimer?.cancel();
     if (_state == GroupCallState.connected) return;
     _updateState(GroupCallState.connected);
     _startTimer();
     debugPrint('[GroupRtcEngine] media connected, timer started');
+  }
+
+  /// 传输层不可恢复故障（SFU 连接失败/房间断开）
+  ///
+  /// SFU 模式媒体通道完全不可用，以 failed 主动 leave 并本地收口；
+  /// Mesh 模式单条对端连接失败不视为通话故障（由 connecting 超时兜底），不触发本回调。
+  void _onTransportBroken(String message) {
+    if (_state == GroupCallState.ended || _state == GroupCallState.idle) return;
+    debugPrint('[GroupRtcEngine] transport broken: $message');
+    _endLocalCallWithNotify(GroupCallEndReason.failed);
   }
 
   /// 获取本地媒体流（Mesh 专用）
@@ -570,6 +596,7 @@ class GroupRtcEngine {
   /// 注意回调顺序：先通知 onCallEnded（项目层保存记录），再置状态为 ended。
   void _endLocalCall() {
     _callTimer?.cancel();
+    _connectTimer?.cancel();
 
     if (_endReason == GroupCallEndReason.none) {
       _endReason = GroupCallEndReason.failed;
@@ -583,6 +610,33 @@ class GroupRtcEngine {
     Future.delayed(const Duration(seconds: 1), () {
       if (_state == GroupCallState.ended) {
         _updateState(GroupCallState.idle);
+      }
+    });
+  }
+
+  /// 以指定原因结束通话并通知服务端（本地异常终止统一入口）
+  ///
+  /// 发送 groupCallLeave(24)：服务端广播成员退出、空房自动回收，
+  /// 其他成员据 leave 通知移除本端，避免对端无感知等待。
+  /// 注意用 leave 而非 end：建联失败时其他成员可能已互联成功，不应被连带踢出。
+  /// 幂等：已结束/空闲时直接忽略。
+  void _endLocalCallWithNotify(GroupCallEndReason reason) {
+    if (_state == GroupCallState.ended || _state == GroupCallState.idle) return;
+    _endReason = reason;
+    _sendGroupSignal(GroupSignalType.groupCallLeave,
+        payload: jsonEncode(const GroupReasonPayload('failed')));
+    _endLocalCall();
+  }
+
+  /// 启动连接超时计时（connecting 态调用，媒体就绪或结束后取消）
+  ///
+  /// 超时仍未建联则以 failed 主动 leave，避免本端无限等待且对端无感知。
+  void _startConnectTimer() {
+    _connectTimer?.cancel();
+    _connectTimer = Timer(connectTimeout, () {
+      if (_state == GroupCallState.connecting) {
+        debugPrint('[GroupRtcEngine] connect timeout ($connectTimeout)');
+        _endLocalCallWithNotify(GroupCallEndReason.failed);
       }
     });
   }
@@ -604,6 +658,7 @@ class GroupRtcEngine {
 
   /// 重置会话字段（不清理媒体，媒体在 cleanup 中处理）
   void _resetSession() {
+    _connectTimer?.cancel();
     _endReason = GroupCallEndReason.none;
     _callId = '';
     _roomId = '';

@@ -39,7 +39,7 @@ class SfuGroupTransport implements GroupMediaTransport {
   @override
   Future<void> start(GroupRoomState roomState) async {
     if (roomState.sfuUrl.isEmpty || roomState.sfuToken.isEmpty) {
-      callback.onError?.call('SFU 接入信息缺失（sfuUrl/sfuToken 为空）');
+      callback.onTransportBroken?.call('SFU 接入信息缺失（sfuUrl/sfuToken 为空）');
       return;
     }
     if (_disposed) return;
@@ -77,12 +77,16 @@ class SfuGroupTransport implements GroupMediaTransport {
       ..on<lk.RoomDisconnectedEvent>((event) {
         debugPrint('[SfuTransport] room disconnected: ${event.reason}');
         callback.onError?.call('SFU 房间已断开: ${event.reason}');
+        // 媒体通道不可用，通知引擎以 failed 主动 leave 收口
+        callback.onTransportBroken?.call('SFU 房间已断开: ${event.reason}');
       });
 
     try {
       await room.connect(roomState.sfuUrl, roomState.sfuToken);
     } catch (e) {
       callback.onError?.call('SFU 连接失败: $e');
+      // 媒体通道不可用，通知引擎以 failed 主动 leave 收口
+      callback.onTransportBroken?.call('SFU 连接失败: $e');
       return;
     }
 

@@ -57,6 +57,12 @@ class GroupMediaTransportCallback {
   /// 传输层错误（不中断通话，仅上报供 UI 提示/日志）
   final void Function(String message)? onError;
 
+  /// 传输层不可恢复故障（SFU 连接失败/房间断开等，媒体通道已不可用）
+  ///
+  /// 引擎收到后以 failed 主动 leave 并本地收口；
+  /// Mesh 模式单条对端连接失败不视为通话故障，不触发本回调。
+  final void Function(String message)? onTransportBroken;
+
   const GroupMediaTransportCallback({
     this.onSendMediaSignal,
     this.onRemoteMemberMedia,
@@ -64,6 +70,7 @@ class GroupMediaTransportCallback {
     this.onLocalVideoTrack,
     this.onMediaConnected,
     this.onError,
+    this.onTransportBroken,
   });
 }
 
