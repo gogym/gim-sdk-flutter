@@ -13,6 +13,10 @@ dependencies:
   protobuf: ^6.0.0
   fixnum: ^1.1.0
   flutter_webrtc: '>=0.12.0 <2.0.0'
+  # SFU（LiveKit）群通话接入；注意其精确锁定 flutter_webrtc（当前 1.6.2+hotfix.3），
+  # 使用方 flutter_webrtc 约束需包含该版本
+  livekit_client: ^2.13.0
+  uuid: ^4.4.0 # 群通话 callId 客户端生成
 
 dev_dependencies:
   flutter_test:

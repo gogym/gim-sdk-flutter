@@ -80,6 +80,9 @@ class Cmd {
   /// WebRTC 信令消息
   static const int rtcSignal = 50;
 
+  /// WebRTC 群通话信令消息（群通话生命周期 + 媒体开关）
+  static const int rtcGroup = 51;
+
   /// 根据 cmd 返回可读名称（调试用）
   static String nameOf(int cmd) {
     return switch (cmd) {
@@ -102,6 +105,7 @@ class Cmd {
       groupNotify => 'GROUP_NOTIFY',
       groupJoinRequestNotify => 'GROUP_JOIN_REQUEST_NOTIFY',
       rtcSignal => 'RTC_SIGNAL',
+      rtcGroup => 'RTC_GROUP',
       _ => 'UNKNOWN($cmd)',
     };
   }

@@ -219,6 +219,11 @@ class GimImService {
       case Cmd.rtcSignal:
         listener.onRtcSignal(packet);
         break;
+
+      // WebRTC 群通话信令
+      case Cmd.rtcGroup:
+        listener.onRtcGroup(packet);
+        break;
     }
   }
 

@@ -35,3 +35,14 @@ export 'service/gim_im_service.dart';
 // rtc 层
 export 'rtc/rtc_types.dart';
 export 'rtc/rtc_engine.dart';
+
+// rtc 群通话层
+// 注意：SFU 模式对外暴露 LiveKit 的 VideoTrack/VideoTrackRenderer 渲染类型，
+// 使用方无需直接依赖 livekit_client
+export 'package:livekit_client/livekit_client.dart'
+    show VideoTrack, VideoTrackRenderer, VideoViewMirrorMode;
+
+export 'rtc/group/group_rtc_types.dart';
+export 'rtc/group/group_rtc_dto.dart';
+export 'rtc/group/group_media_transport.dart';
+export 'rtc/group/group_rtc_engine.dart';

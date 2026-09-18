@@ -48,6 +48,9 @@ class ImEventListener {
   /// WebRTC 信令
   void onRtcSignal(proto.Packet packet) {}
 
+  /// WebRTC 群通话信令（cmd=51 RTC_GROUP，生命周期 + 媒体开关）
+  void onRtcGroup(proto.Packet packet) {}
+
   /// 被踢下线
   void onKicked(int code, String message) {}
 

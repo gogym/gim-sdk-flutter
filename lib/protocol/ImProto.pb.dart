@@ -1696,6 +1696,8 @@ class RtcGroup extends $pb.GeneratedMessage {
     $core.String? groupId,
     $core.String? payload,
     $core.String? callId,
+    $core.String? roomId,
+    $core.int? mode,
   }) {
     final result = create();
     if (signalType != null) result.signalType = signalType;
@@ -1703,6 +1705,8 @@ class RtcGroup extends $pb.GeneratedMessage {
     if (groupId != null) result.groupId = groupId;
     if (payload != null) result.payload = payload;
     if (callId != null) result.callId = callId;
+    if (roomId != null) result.roomId = roomId;
+    if (mode != null) result.mode = mode;
     return result;
   }
 
@@ -1724,6 +1728,8 @@ class RtcGroup extends $pb.GeneratedMessage {
     ..aOS(3, _omitFieldNames ? '' : 'groupId', protoName: 'groupId')
     ..aOS(4, _omitFieldNames ? '' : 'payload')
     ..aOS(5, _omitFieldNames ? '' : 'callId', protoName: 'callId')
+    ..aOS(6, _omitFieldNames ? '' : 'roomId', protoName: 'roomId')
+    ..aI(7, _omitFieldNames ? '' : 'mode', protoName: 'mode')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1788,6 +1794,24 @@ class RtcGroup extends $pb.GeneratedMessage {
   $core.bool hasCallId() => $_has(4);
   @$pb.TagNumber(5)
   void clearCallId() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.String get roomId => $_getSZ(5);
+  @$pb.TagNumber(6)
+  set roomId($core.String value) => $_setString(5, value);
+  @$pb.TagNumber(6)
+  $core.bool hasRoomId() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearRoomId() => $_clearField(6);
+
+  @$pb.TagNumber(7)
+  $core.int get mode => $_getIZ(6);
+  @$pb.TagNumber(7)
+  set mode($core.int value) => $_setSignedInt32(6, value);
+  @$pb.TagNumber(7)
+  $core.bool hasMode() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearMode() => $_clearField(7);
 }
 
 const $core.bool _omitFieldNames =

@@ -229,6 +229,36 @@ class PacketCodec {
     return proto.RtcSignal.fromBuffer(packet.body);
   }
 
+  /// 构建 WebRTC 群通话信令 Packet（cmd=51 RTC_GROUP）
+  ///
+  /// [signalType] 见 [GroupSignalType]（声明于 rtc/group/group_rtc_types.dart，
+  /// 此处用 int 避免协议层依赖 RTC 层）；[roomId] 群通话房间ID（服务端生成）；
+  /// [mode] 通话模式（0-Mesh 1-SFU），仅服务端回填，客户端上行可不传。
+  static proto.Packet buildRtcGroup({
+    required int signalType,
+    required String senderId,
+    required String groupId,
+    String payload = '',
+    String callId = '',
+    String roomId = '',
+    int mode = 0,
+  }) {
+    final body = proto.RtcGroup()
+      ..signalType = signalType
+      ..senderId = senderId
+      ..groupId = groupId
+      ..payload = payload
+      ..callId = callId
+      ..roomId = roomId
+      ..mode = mode;
+    return create(Cmd.rtcGroup, body: body);
+  }
+
+  /// 解析 Packet body 为 RtcGroup
+  static proto.RtcGroup parseRtcGroup(proto.Packet packet) {
+    return proto.RtcGroup.fromBuffer(packet.body);
+  }
+
   /// 解析 Packet body 为 KickNotify
   static proto.KickNotify parseKickNotify(proto.Packet packet) {
     return proto.KickNotify.fromBuffer(packet.body);
@@ -263,6 +293,7 @@ class PacketCodec {
       Cmd.groupJoinRequestNotify =>
           proto.GroupJoinRequestNotify.fromBuffer(packet.body),
       Cmd.rtcSignal => proto.RtcSignal.fromBuffer(packet.body),
+      Cmd.rtcGroup => proto.RtcGroup.fromBuffer(packet.body),
       Cmd.kickNotify => proto.KickNotify.fromBuffer(packet.body),
       _ => null,
     };

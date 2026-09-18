@@ -352,6 +352,8 @@ const RtcGroup$json = {
     {'1': 'groupId', '3': 3, '4': 1, '5': 9, '10': 'groupId'},
     {'1': 'payload', '3': 4, '4': 1, '5': 9, '10': 'payload'},
     {'1': 'callId', '3': 5, '4': 1, '5': 9, '10': 'callId'},
+    {'1': 'roomId', '3': 6, '4': 1, '5': 9, '10': 'roomId'},
+    {'1': 'mode', '3': 7, '4': 1, '5': 5, '10': 'mode'},
   ],
 };
 
@@ -359,4 +361,5 @@ const RtcGroup$json = {
 final $typed_data.Uint8List rtcGroupDescriptor = $convert.base64Decode(
     'CghSdGNHcm91cBIeCgpzaWduYWxUeXBlGAEgASgFUgpzaWduYWxUeXBlEhoKCHNlbmRlcklkGA'
     'IgASgJUghzZW5kZXJJZBIYCgdncm91cElkGAMgASgJUgdncm91cElkEhgKB3BheWxvYWQYBCAB'
-    'KAlSB3BheWxvYWQSFgoGY2FsbElkGAUgASgJUgZjYWxsSWQ=');
+    'KAlSB3BheWxvYWQSFgoGY2FsbElkGAUgASgJUgZjYWxsSWQSFgoGcm9vbUlkGAYgASgJUgZyb2'
+    '9tSWQSEgoEbW9kZRgHIAEoBVIEbW9kZQ==');

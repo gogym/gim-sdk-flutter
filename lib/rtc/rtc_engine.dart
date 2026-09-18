@@ -75,6 +75,12 @@ class RtcEngineCallback {
 /// - 权限管理（麦克风、摄像头）
 /// - 通话记录等业务逻辑
 class RtcEngine {
+  /// 进入 connecting 后未建联的连接超时时长
+  ///
+  /// 超时后本地以 failed 结束并向对端发 callHangup(reason=failed)，
+  /// 避免对端因网络异常收不到后续信令而一直停留在通话页。
+  static const Duration _connectTimeout = Duration(seconds: 30);
+
   /// 获取当前用户 ID 的回调（动态获取，避免初始化时 userId 尚未就绪）
   final String Function() localUserId;
 
@@ -122,6 +128,9 @@ class RtcEngine {
   /// 通话计时器
   Timer? _callTimer;
 
+  /// 连接超时计时器（connecting 态启动，建联或结束后取消）
+  Timer? _connectTimer;
+
   /// 通话时长（秒）
   int _callDuration = 0;
 
@@ -146,6 +155,7 @@ class RtcEngine {
   /// 释放所有资源
   Future<void> dispose() async {
     _callTimer?.cancel();
+    _connectTimer?.cancel();
     await _cleanup();
   }
 
@@ -179,6 +189,7 @@ class RtcEngine {
   Future<void> acceptCall() async {
     _sendSignal(RtcSignalType.callAccept, _remoteUserId, {}, callId: _callId);
     _updateState(RtcCallState.connecting);
+    _startConnectTimer();
 
     // 提前获取本地媒体流
     if (!_mediaReady) {
@@ -296,7 +307,7 @@ class RtcEngine {
         _onCallCancel();
         break;
       case RtcSignalType.callHangup:
-        _onCallHangup();
+        _onCallHangup(signal);
         break;
       case RtcSignalType.offer:
         _onOffer(signal);
@@ -346,6 +357,7 @@ class RtcEngine {
     }
 
     _updateState(RtcCallState.connecting);
+    _startConnectTimer();
     _createAndSendOffer();
   }
 
@@ -376,8 +388,19 @@ class RtcEngine {
   }
 
   /// 收到挂断
-  void _onCallHangup() {
+  ///
+  /// 解析 payload reason：'failed' 映射为连接失败（如对端建联超时/失败时主动同步），
+  /// 其余视为正常挂断。
+  void _onCallHangup(proto.RtcSignal signal) {
     _endReason = RtcCallEndReason.normal;
+    if (signal.payload.isNotEmpty) {
+      try {
+        final payload = jsonDecode(signal.payload);
+        if (payload is Map && payload['reason'] == 'failed') {
+          _endReason = RtcCallEndReason.failed;
+        }
+      } catch (_) {}
+    }
     _endCall();
   }
 
@@ -524,7 +547,9 @@ class RtcEngine {
         _onPeerConnected();
       } else if (state == webrtc.RTCPeerConnectionState.RTCPeerConnectionStateFailed ||
                  state == webrtc.RTCPeerConnectionState.RTCPeerConnectionStateDisconnected) {
-        _endCall();
+        // 建联失败/断开：以 failed 结束并向对端同步挂断，
+        // 否则对端收不到任何信令会一直停留在通话页
+        _onPeerConnectionBroken();
       }
     };
 
@@ -553,10 +578,20 @@ class RtcEngine {
 
   /// 连接成功回调（去重）
   void _onPeerConnected() {
+    _connectTimer?.cancel();
     if (_state == RtcCallState.connected) return;
     _updateState(RtcCallState.connected);
     _startTimer();
     debugPrint('[RtcEngine] Call connected, timer started');
+  }
+
+  /// 对等连接失败/断开（PeerConnection Failed 或 Disconnected）
+  ///
+  /// 向对端发 callHangup(reason=failed) 后本地结束，保证双方通话页同步退出。
+  /// 幂等：已结束/空闲时忽略（如对端先发来挂断信令导致本地已结束）。
+  void _onPeerConnectionBroken() {
+    if (_state == RtcCallState.ended || _state == RtcCallState.idle) return;
+    _endCallWithNotify(RtcCallEndReason.failed);
   }
 
   /// 将缓冲的 ICE 候选添加到 PeerConnection
@@ -619,6 +654,7 @@ class RtcEngine {
   /// 否则项目层监听 ended 时拿不到结束原因/通话记录。
   void _endCall() {
     _callTimer?.cancel();
+    _connectTimer?.cancel();
 
     if (_endReason == RtcCallEndReason.none) {
       _endReason = RtcCallEndReason.failed;
@@ -632,6 +668,34 @@ class RtcEngine {
     Future.delayed(const Duration(seconds: 1), () {
       if (_state == RtcCallState.ended) {
         _updateState(RtcCallState.idle);
+      }
+    });
+  }
+
+  /// 以指定原因结束通话并通知对端（本地异常终止统一入口）
+  ///
+  /// 用于连接失败/建联超时等本端异常场景：先向对端发 callHangup(reason)，
+  /// 再走 [_endCall] 本地收口，保证对端不会停留在通话页。
+  /// 幂等：已结束/空闲时直接忽略。
+  void _endCallWithNotify(RtcCallEndReason reason) {
+    if (_state == RtcCallState.ended || _state == RtcCallState.idle) return;
+    _endReason = reason;
+    if (_remoteUserId.isNotEmpty) {
+      _sendSignal(RtcSignalType.callHangup, _remoteUserId,
+          {'reason': reason.name}, callId: _callId);
+    }
+    _endCall();
+  }
+
+  /// 启动连接超时计时（connecting 态调用，建联成功或结束后取消）
+  ///
+  /// 超时仍未建联则以 failed 结束并通知对端，避免双方无限等待。
+  void _startConnectTimer() {
+    _connectTimer?.cancel();
+    _connectTimer = Timer(_connectTimeout, () {
+      if (_state == RtcCallState.connecting) {
+        debugPrint('[RtcEngine] Connect timeout ($_connectTimeout)');
+        _endCallWithNotify(RtcCallEndReason.failed);
       }
     });
   }
