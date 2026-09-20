@@ -639,12 +639,14 @@ class RtcEngine {
       debugPrint('[RtcEngine] PeerConnection state: $state');
       if (state == webrtc.RTCPeerConnectionState.RTCPeerConnectionStateConnected) {
         _onPeerConnected();
-      } else if (state == webrtc.RTCPeerConnectionState.RTCPeerConnectionStateFailed ||
-                 state == webrtc.RTCPeerConnectionState.RTCPeerConnectionStateDisconnected) {
-        // 建联失败/断开：以 failed 结束并向对端同步挂断，
+      } else if (state == webrtc.RTCPeerConnectionState.RTCPeerConnectionStateFailed) {
+        // 建联失败：以 failed 结束并向对端同步挂断，
         // 否则对端收不到任何信令会一直停留在通话页
         _onPeerConnectionBroken();
       }
+      // 注意：Disconnected 是瞬态（网络切换/信号抖动时闪断），
+      // libwebrtc 会自动重连回到 Connected 或最终进入 Failed，
+      // 此处不结束通话，避免偶发闪断误杀正常通话
     };
 
     // 备用：ICE 连接状态（某些平台 onConnectionState 不可靠）

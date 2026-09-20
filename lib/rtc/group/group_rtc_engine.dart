@@ -82,6 +82,9 @@ class GroupRtcEngine {
   /// 可变静态字段仅为单元测试可注入短超时。
   static Duration connectTimeout = const Duration(seconds: 30);
 
+  /// transport 未就绪期间媒体信令缓冲上限（防异常场景无限增长）
+  static const int maxBufferedMediaSignals = 50;
+
   /// 当前用户 ID（动态获取，避免初始化时未就绪）
   final String Function() localUserId;
 
@@ -105,6 +108,9 @@ class GroupRtcEngine {
 
   /// 媒体传输层（Mesh/SFU，roomState 到达后创建）
   GroupMediaTransport? _transport;
+
+  /// transport 未就绪期间缓冲的媒体信令（callId 匹配），transport 启动后重放
+  final List<proto.RtcSignal> _pendingMediaSignals = [];
 
   /// 本地媒体流（仅 Mesh 模式由引擎获取；SFU 由 LiveKit 管理）
   webrtc.MediaStream? _localStream;
@@ -279,8 +285,27 @@ class GroupRtcEngine {
   ///
   /// 项目层按 callId 路由：与群通话匹配的才转调此方法（见 [canHandleMediaCallId]），
   /// 避免 1:1 通话与群通话信令串线。
+  ///
+  /// transport 未创建时（roomState 处理中/异步本地媒体采集中）缓冲当前通话
+  /// 信令，就绪后重放：本端 join 后服务端可能先向其他成员广播 join 通知
+  /// （对端随即发来 offer），而本端的 roomState/getUserMedia 尚未完成 ——
+  /// 若直接丢弃，对端已发 offer 等 answer，双方互等永远无法建联
+  /// （对标 Android 同步采集的零窗口行为）
   void handleMediaSignal(proto.RtcSignal signal) {
-    _transport?.handleMediaSignal(signal);
+    final transport = _transport;
+    if (transport != null) {
+      transport.handleMediaSignal(signal);
+      return;
+    }
+    if (_callId.isNotEmpty && signal.callId == _callId) {
+      if (_pendingMediaSignals.length >= maxBufferedMediaSignals) {
+        _pendingMediaSignals.removeAt(0);
+      }
+      _pendingMediaSignals.add(signal);
+      debugPrint('[GroupRtcEngine] transport not ready, buffer media signal: '
+          'type=${signal.signalType} from=${signal.senderId} '
+          '(${_pendingMediaSignals.length} pending)');
+    }
   }
 
   /// 当前群通话是否可处理该 callId 的点对点媒体信令
@@ -494,6 +519,21 @@ class GroupRtcEngine {
     }
 
     await _transport!.start(roomState);
+
+    // 重放 transport 就绪前缓冲的媒体信令（offer/answer/ICE）
+    _replayBufferedMediaSignals();
+  }
+
+  /// 重放缓冲的媒体信令（transport 创建并 start 后调用）
+  void _replayBufferedMediaSignals() {
+    if (_transport == null || _pendingMediaSignals.isEmpty) return;
+    final buffered = List<proto.RtcSignal>.from(_pendingMediaSignals);
+    _pendingMediaSignals.clear();
+    debugPrint(
+        '[GroupRtcEngine] replay ${buffered.length} buffered media signals');
+    for (final signal in buffered) {
+      _transport!.handleMediaSignal(signal);
+    }
   }
 
   /// 媒体连接就绪（首个对端连通 / SFU 房间连接成功）→ 启动计时
@@ -646,6 +686,7 @@ class GroupRtcEngine {
     try {
       await _transport?.dispose();
       _transport = null;
+      _pendingMediaSignals.clear();
       await _localStream?.dispose();
       _localStream = null;
       _members.clear();

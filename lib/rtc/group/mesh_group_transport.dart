@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -83,6 +84,8 @@ class MeshGroupTransport implements GroupMediaTransport {
 
   @override
   void syncRemoteMembers(Set<String> joinedUserIds) {
+    final me = localUserId();
+    // 关闭已离开/被移除的对端
     final stale = _peers.keys
         .where((userId) => !joinedUserIds.contains(userId))
         .toList();
@@ -90,6 +93,21 @@ class MeshGroupTransport implements GroupMediaTransport {
       debugPrint('[MeshTransport] peer left: $userId');
       _closePeer(userId);
       callback.onRemoteMemberRemoved?.call(userId);
+    }
+
+    // 为新加入的成员补建连接（offer 决策与 start 一致，两端结果相同无冲突）。
+    // 时序：服务端仅在成员 join 时向其本人下发 roomState，其他成员只收到
+    // participantNotify —— 发起人收到 roomState 时后加入者尚未 JOINED，
+    // 若不在 join 通知中补建，当本端是 offerer（字典序较小）时双方
+    // 互相等待 offer，永远无法建联（卡在连接中）（对标 Android SDK；
+    // 额外排除自己，避免给自己建出无意义的连接）
+    final missing = joinedUserIds
+        .where((userId) =>
+            userId != me && !_peers.containsKey(userId))
+        .toList();
+    for (final peerId in missing) {
+      debugPrint('[MeshTransport] peer joined, connecting: $peerId');
+      unawaited(_connectPeer(peerId, makeOffer: isMeshOfferer(me, peerId)));
     }
   }
 
