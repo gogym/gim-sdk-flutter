@@ -122,6 +122,12 @@ class RtcEngine {
   /// 媒体是否已就绪
   bool _mediaReady = false;
 
+  /// 是否正在 SDP 协商（防重复 OFFER/ACCEPT 触发并发协商，对标 Android SDK）
+  bool _negotiating = false;
+
+  /// 最近一次来电的 callId（跨通话保留，用于拦截服务端重复投递的来电信令）
+  String _lastCallId = '';
+
   /// 服务端下发的 TURN 凭证信息
   Map<String, dynamic>? _serverTurnInfo;
 
@@ -171,6 +177,8 @@ class RtcEngine {
     _isInitiator = true;
     _endReason = RtcCallEndReason.none;
     _callId = ''; // callId 由服务端生成，通过 callAck 回传（未到达前 cancel 由服务端按占用会话兜底）
+    // 上一通通话清理完成后允许立即发起新通话
+    _negotiating = false;
 
     _updateState(RtcCallState.calling);
 
@@ -187,6 +195,8 @@ class RtcEngine {
   ///
   /// 发送 callAccept 信令，并提前获取本地媒体流。
   Future<void> acceptCall() async {
+    // 接听新来电，重置协商标志
+    _negotiating = false;
     _sendSignal(RtcSignalType.callAccept, _remoteUserId, {}, callId: _callId);
     _updateState(RtcCallState.connecting);
     _startConnectTimer();
@@ -284,7 +294,13 @@ class RtcEngine {
 
   /// 处理收到的 RTC 信令（由项目层从 IM 事件中转调）
   void handleSignal(proto.RtcSignal signal) {
-    debugPrint('[RtcEngine] signal type=${signal.signalType} from=${signal.senderId} callId=${signal.callId}');
+    debugPrint('[RtcEngine] signal type=${signal.signalType} from=${signal.senderId} callId=${signal.callId}, state=$_state');
+
+    // 空闲状态下仅响应来电请求，其余视为过期信令
+    if (_state == RtcCallState.idle && signal.signalType != RtcSignalType.callRequest) {
+      debugPrint('[RtcEngine] signal dropped (idle), type=${signal.signalType}');
+      return;
+    }
 
     switch (signal.signalType) {
       case RtcSignalType.callRequest:
@@ -304,7 +320,7 @@ class RtcEngine {
         _onCallReject(signal);
         break;
       case RtcSignalType.callCancel:
-        _onCallCancel();
+        _onCallCancel(signal);
         break;
       case RtcSignalType.callHangup:
         _onCallHangup(signal);
@@ -328,15 +344,38 @@ class RtcEngine {
 
   /// 收到呼叫请求（被叫方）
   void _onCallRequest(proto.RtcSignal signal) {
+    // 同一通来电的重复信令（服务端重投）→ 丢弃
+    if (signal.callId.isNotEmpty && signal.callId == _lastCallId && _state != RtcCallState.idle) {
+      debugPrint('[RtcEngine] duplicate CALL_REQUEST ignored, callId=${signal.callId}');
+      return;
+    }
+    // 通话进行中收到新来电 → 忽略，防止串线
+    if (_state == RtcCallState.calling ||
+        _state == RtcCallState.connecting ||
+        _state == RtcCallState.connected) {
+      debugPrint('[RtcEngine] CALL_REQUEST ignored (busy), state=$_state');
+      return;
+    }
+
+    _lastCallId = signal.callId;
+    // 新通话开始，重置协商标志
+    _negotiating = false;
+
     _remoteUserId = signal.senderId;
     _callId = signal.callId;
-    _callType = RtcCallType.video;
     _isInitiator = false;
     _endReason = RtcCallEndReason.none;
 
-    // 解析服务端下发的 TURN 凭证
+    // 解析服务端下发的 TURN 凭证与通话类型
     if (signal.payload.isNotEmpty) {
-      _parseTurnFromPayload(jsonDecode(signal.payload) as Map<String, dynamic>);
+      try {
+        final payload = jsonDecode(signal.payload) as Map<String, dynamic>;
+        _parseTurnFromPayload(payload);
+        // 通话类型由主叫 payload 指定（此前硬编码 video，音频来电会被误判为视频）
+        _callType = payload['callType'] == 'audio' ? RtcCallType.audio : RtcCallType.video;
+      } catch (e) {
+        debugPrint('[RtcEngine] parse CALL_REQUEST payload error: $e');
+      }
     }
 
     _updateState(RtcCallState.ringing);
@@ -347,6 +386,12 @@ class RtcEngine {
 
   /// 收到接听（主叫方）→ 创建 PeerConnection 并发送 Offer
   void _onCallAccept(proto.RtcSignal signal) {
+    // SDP 协商已在进行或已完成 → 重复 accept（信令重投），丢弃
+    if (_negotiating || _remoteDescSet) {
+      debugPrint('[RtcEngine] duplicate CALL_ACCEPT ignored, state=$_state');
+      return;
+    }
+
     if (signal.callId.isNotEmpty) {
       _callId = signal.callId;
     }
@@ -375,6 +420,12 @@ class RtcEngine {
 
   /// 收到拒绝
   void _onCallReject(proto.RtcSignal signal) {
+    // 过期拒绝信令（callId 不匹配）→ 丢弃，防止误伤新通话
+    if (signal.callId.isNotEmpty && signal.callId != _callId) {
+      debugPrint('[RtcEngine] stale CALL_REJECT ignored, callId=${signal.callId} != $_callId');
+      return;
+    }
+
     final payload = signal.payload.isNotEmpty ? jsonDecode(signal.payload) : {};
     final reason = payload['reason'] as String?;
     _endReason = (reason == 'busy') ? RtcCallEndReason.busy : RtcCallEndReason.rejected;
@@ -382,7 +433,12 @@ class RtcEngine {
   }
 
   /// 收到取消
-  void _onCallCancel() {
+  void _onCallCancel(proto.RtcSignal signal) {
+    // 过期取消信令（callId 不匹配）→ 丢弃，防止误伤新通话
+    if (signal.callId.isNotEmpty && signal.callId != _callId) {
+      debugPrint('[RtcEngine] stale CALL_CANCEL ignored, callId=${signal.callId} != $_callId');
+      return;
+    }
     _endReason = RtcCallEndReason.cancelled;
     _endCall();
   }
@@ -392,6 +448,11 @@ class RtcEngine {
   /// 解析 payload reason：'failed' 映射为连接失败（如对端建联超时/失败时主动同步），
   /// 其余视为正常挂断。
   void _onCallHangup(proto.RtcSignal signal) {
+    // 过期挂断信令（callId 不匹配）→ 丢弃，防止误伤新通话
+    if (signal.callId.isNotEmpty && signal.callId != _callId) {
+      debugPrint('[RtcEngine] stale CALL_HANGUP ignored, callId=${signal.callId} != $_callId');
+      return;
+    }
     _endReason = RtcCallEndReason.normal;
     if (signal.payload.isNotEmpty) {
       try {
@@ -446,45 +507,76 @@ class RtcEngine {
   Future<void> _createAndSendOffer() async {
     await _initPeerConnection();
 
-    final offer = await _peerConnection!.createOffer();
-    await _peerConnection!.setLocalDescription(offer);
+    // 标记协商进行中，防止重复 CALL_ACCEPT 触发并发 createOffer
+    _negotiating = true;
+    try {
+      final offer = await _peerConnection!.createOffer();
+      await _peerConnection!.setLocalDescription(offer);
 
-    _sendSignal(RtcSignalType.offer, _remoteUserId, {
-      'sdp': offer.sdp,
-    }, callId: _callId);
+      _sendSignal(RtcSignalType.offer, _remoteUserId, {
+        'sdp': offer.sdp,
+      }, callId: _callId);
 
-    debugPrint('[RtcEngine] Offer sent to $_remoteUserId');
+      debugPrint('[RtcEngine] Offer sent to $_remoteUserId');
+    } catch (e) {
+      _negotiating = false;
+      debugPrint('[RtcEngine] createOffer failed: $e');
+      rethrow;
+    }
   }
 
   /// 被叫方：收到 Offer，创建 Answer
   Future<void> _onOffer(proto.RtcSignal signal) async {
-    await _initPeerConnection();
+    // SDP 协商已在进行或已完成 → 重复 offer（信令重投），丢弃
+    if (_negotiating || _remoteDescSet) {
+      debugPrint('[RtcEngine] duplicate OFFER ignored');
+      return;
+    }
+    // 标记协商进行中，防止重复 OFFER 触发并发 setRemoteDescription
+    _negotiating = true;
 
-    final payload = jsonDecode(signal.payload);
-    final desc = webrtc.RTCSessionDescription(payload['sdp'] as String, 'offer');
-    await _peerConnection!.setRemoteDescription(desc);
-    debugPrint('[RtcEngine] Remote description set (offer)');
+    try {
+      await _initPeerConnection();
 
-    await _flushPendingCandidates();
+      final payload = jsonDecode(signal.payload);
+      final desc = webrtc.RTCSessionDescription(payload['sdp'] as String, 'offer');
+      await _peerConnection!.setRemoteDescription(desc);
+      debugPrint('[RtcEngine] Remote description set (offer)');
 
-    final answer = await _peerConnection!.createAnswer();
-    await _peerConnection!.setLocalDescription(answer);
+      await _flushPendingCandidates();
 
-    _sendSignal(RtcSignalType.answer, signal.senderId, {
-      'sdp': answer.sdp,
-    }, callId: _callId);
+      final answer = await _peerConnection!.createAnswer();
+      await _peerConnection!.setLocalDescription(answer);
 
-    debugPrint('[RtcEngine] Answer sent to ${signal.senderId}');
+      _sendSignal(RtcSignalType.answer, signal.senderId, {
+        'sdp': answer.sdp,
+      }, callId: _callId);
+
+      // 协商完成（answer 已发出）
+      _negotiating = false;
+      debugPrint('[RtcEngine] Answer sent to ${signal.senderId}');
+    } catch (e) {
+      _negotiating = false;
+      rethrow;
+    }
   }
 
   /// 主叫方：收到 Answer，设置远端描述
   Future<void> _onAnswer(proto.RtcSignal signal) async {
+    // 远端描述已设置 → 重复 answer（信令重投），丢弃
+    if (_remoteDescSet) {
+      debugPrint('[RtcEngine] duplicate ANSWER ignored');
+      return;
+    }
+
     final payload = jsonDecode(signal.payload);
     final desc = webrtc.RTCSessionDescription(payload['sdp'] as String, 'answer');
     await _peerConnection!.setRemoteDescription(desc);
     debugPrint('[RtcEngine] Remote description set (answer)');
 
     await _flushPendingCandidates();
+    // 协商完成（answer 已设置）
+    _negotiating = false;
   }
 
   /// 处理远端 ICE Candidate
@@ -523,7 +615,9 @@ class RtcEngine {
     debugPrint('[RtcEngine] PeerConnection created');
 
     _remoteDescSet = false;
-    _pendingCandidates.clear();
+    // 注意：此处不清空 _pendingCandidates —— 被叫在收到 offer 前缓冲的主叫候选
+    // 依赖它存活到 setRemoteDescription 后回放；上一通话的残留由 _cleanup() 清理
+    // （对标 Android SDK initPeerConnection 的同名注释）
 
     _peerConnection!.onIceCandidate = (candidate) {
       debugPrint('[RtcEngine] Local ICE candidate generated');
@@ -709,6 +803,7 @@ class RtcEngine {
       _peerConnection = null;
       _mediaReady = false;
       _remoteDescSet = false;
+      _negotiating = false;
       _pendingCandidates.clear();
       _serverTurnInfo = null;
       _callId = '';
