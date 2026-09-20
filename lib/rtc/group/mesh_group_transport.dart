@@ -173,14 +173,16 @@ class MeshGroupTransport implements GroupMediaTransport {
     };
 
     pc.onTrack = (event) {
-      if (event.streams.isEmpty) return;
-      final stream = event.streams[0];
-      debugPrint('[MeshTransport] remote track: peer=$peerId, ${stream.id}');
-      callback.onRemoteMemberMedia?.call(GroupRemoteMemberMedia(
-        userId: peerId,
-        meshStream: stream,
-        hasVideo: stream.getVideoTracks().isNotEmpty,
-      ));
+      debugPrint('[MeshTransport] onTrack: peer=$peerId, '
+          'kind=${event.track.kind}, streams=${event.streams.length}');
+      if (event.streams.isNotEmpty) {
+        _notifyRemoteMedia(peerId, event.streams[0]);
+        return;
+      }
+      // 对端轨道未关联 MediaStream（Android 端 UNIFIED_PLAN addTrack 不带
+      // streamId，原生 onAddTrack 收到的 MediaStream[] 为空）时，本端自建流
+      // 装载远端轨道，否则渲染层拿不到 MediaStream、看不到对端画面
+      unawaited(_attachRemoteTrack(peerId, event.track));
     };
 
     pc.onConnectionState = (state) {
@@ -202,6 +204,42 @@ class MeshGroupTransport implements GroupMediaTransport {
     if (makeOffer) {
       await _createOffer(peerId);
     }
+  }
+
+  /// 将远端轨道装入对端自建流并通知回调（惰性创建，多轨道复用同一条流）
+  ///
+  /// 与 1:1 引擎 [RtcEngine._attachRemoteTrack] 同源逻辑：Unified Plan 下
+  /// MediaStream 仅为分组标签，track-only 对端（如 Android 端）需要本端
+  /// 合成流作为渲染容器。
+  Future<void> _attachRemoteTrack(
+      String peerId, webrtc.MediaStreamTrack track) async {
+    final peer = _peers[peerId];
+    if (peer == null) return;
+    try {
+      peer.remoteStream ??=
+          await webrtc.createLocalMediaStream('remote_$peerId');
+      final exists =
+          peer.remoteStream!.getTracks().any((t) => t.id == track.id);
+      if (!exists) {
+        // addToNative 默认 true：原生流需持有轨道，渲染器才能出画面
+        await peer.remoteStream!.addTrack(track);
+      }
+      _notifyRemoteMedia(peerId, peer.remoteStream!);
+      debugPrint('[MeshTransport] remote track attached: '
+          'peer=$peerId, kind=${track.kind}');
+    } catch (e) {
+      debugPrint('[MeshTransport] attach remote track error: peer=$peerId, $e');
+    }
+  }
+
+  /// 通知上层对端媒体流到达
+  void _notifyRemoteMedia(String peerId, webrtc.MediaStream stream) {
+    debugPrint('[MeshTransport] remote track: peer=$peerId, ${stream.id}');
+    callback.onRemoteMemberMedia?.call(GroupRemoteMemberMedia(
+      userId: peerId,
+      meshStream: stream,
+      hasVideo: stream.getVideoTracks().isNotEmpty,
+    ));
   }
 
   /// 发起 Offer（字典序较小方调用）
@@ -279,6 +317,9 @@ class MeshGroupTransport implements GroupMediaTransport {
     } catch (e) {
       debugPrint('[MeshTransport] close peer error: $e');
     }
+    // 自建远端流随对端连接一并释放
+    unawaited(peer.remoteStream?.dispose());
+    peer.remoteStream = null;
   }
 
   // ====================== 信令与工具 ======================
@@ -337,6 +378,9 @@ class _MeshPeer {
 
   /// 远端描述就绪前缓冲的 ICE 候选
   final List<webrtc.RTCIceCandidate> pendingCandidates = [];
+
+  /// 对端远端流（track-only 对端时由本端自建并装载远端轨道）
+  webrtc.MediaStream? remoteStream;
 
   bool remoteDescSet = false;
 

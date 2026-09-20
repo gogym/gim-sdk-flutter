@@ -116,6 +116,9 @@ class RtcEngine {
   /// ICE 候选缓冲（在远端描述设置前暂存）
   final List<webrtc.RTCIceCandidate> _pendingCandidates = [];
 
+  /// 远端媒体流（对端轨道未关联 MediaStream 时由本端自建并装载远端轨道）
+  webrtc.MediaStream? _remoteStream;
+
   /// 远端描述是否已设置
   bool _remoteDescSet = false;
 
@@ -632,7 +635,12 @@ class RtcEngine {
       debugPrint('[RtcEngine] onTrack: kind=${event.track.kind}, streams=${event.streams.length}');
       if (event.streams.isNotEmpty) {
         callback.onRemoteStreamReceived(event.streams[0]);
+        return;
       }
+      // 对端轨道未关联 MediaStream（Android 端 UNIFIED_PLAN addTrack 不带
+      // streamId，原生 onAddTrack 收到的 MediaStream[] 为空）时，本端自建流
+      // 装载远端轨道，否则渲染层拿不到 MediaStream、看不到对端画面
+      unawaited(_attachRemoteTrack(event.track));
     };
 
     _peerConnection!.onConnectionState = (state) {
@@ -796,11 +804,33 @@ class RtcEngine {
     });
   }
 
+  /// 将远端轨道装入自建流并通知（惰性创建，多轨道复用同一条流）
+  ///
+  /// audio/video 各触发一次 onTrack，每次都会通知回调；
+  /// 轨道按 id 去重，渲染层拿到同一流对象刷新即可。
+  Future<void> _attachRemoteTrack(webrtc.MediaStreamTrack track) async {
+    try {
+      _remoteStream ??= await webrtc.createLocalMediaStream('remote_stream');
+      final exists =
+          _remoteStream!.getTracks().any((t) => t.id == track.id);
+      if (!exists) {
+        // addToNative 默认 true：原生流需持有轨道，渲染器才能出画面
+        await _remoteStream!.addTrack(track);
+      }
+      callback.onRemoteStreamReceived(_remoteStream!);
+      debugPrint('[RtcEngine] remote track attached: kind=${track.kind}');
+    } catch (e) {
+      debugPrint('[RtcEngine] attach remote track error: $e');
+    }
+  }
+
   /// 清理 WebRTC 资源
   Future<void> _cleanup() async {
     try {
       await _localStream?.dispose();
       _localStream = null;
+      await _remoteStream?.dispose();
+      _remoteStream = null;
       await _peerConnection?.close();
       _peerConnection = null;
       _mediaReady = false;
