@@ -768,10 +768,12 @@ class ReadReceipt extends $pb.GeneratedMessage {
   factory ReadReceipt({
     $core.String? conversationId,
     $core.String? lastReadMsgId,
+    $core.String? receiverId,
   }) {
     final result = create();
     if (conversationId != null) result.conversationId = conversationId;
     if (lastReadMsgId != null) result.lastReadMsgId = lastReadMsgId;
+    if (receiverId != null) result.receiverId = receiverId;
     return result;
   }
 
@@ -791,6 +793,7 @@ class ReadReceipt extends $pb.GeneratedMessage {
     ..aOS(1, _omitFieldNames ? '' : 'conversationId',
         protoName: 'conversationId')
     ..aOS(2, _omitFieldNames ? '' : 'lastReadMsgId', protoName: 'lastReadMsgId')
+    ..aOS(3, _omitFieldNames ? '' : 'receiverId', protoName: 'receiverId')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -829,6 +832,15 @@ class ReadReceipt extends $pb.GeneratedMessage {
   $core.bool hasLastReadMsgId() => $_has(1);
   @$pb.TagNumber(2)
   void clearLastReadMsgId() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get receiverId => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set receiverId($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasReceiverId() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearReceiverId() => $_clearField(3);
 }
 
 /// cmd = 15: 消息撤回请求（客户端 → 服务端）
@@ -837,11 +849,13 @@ class MsgRecallRequest extends $pb.GeneratedMessage {
     $core.String? msgId,
     $core.String? conversationId,
     $core.int? chatType,
+    $core.String? receiverId,
   }) {
     final result = create();
     if (msgId != null) result.msgId = msgId;
     if (conversationId != null) result.conversationId = conversationId;
     if (chatType != null) result.chatType = chatType;
+    if (receiverId != null) result.receiverId = receiverId;
     return result;
   }
 
@@ -862,6 +876,7 @@ class MsgRecallRequest extends $pb.GeneratedMessage {
     ..aOS(2, _omitFieldNames ? '' : 'conversationId',
         protoName: 'conversationId')
     ..aI(3, _omitFieldNames ? '' : 'chatType', protoName: 'chatType')
+    ..aOS(4, _omitFieldNames ? '' : 'receiverId', protoName: 'receiverId')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -909,6 +924,15 @@ class MsgRecallRequest extends $pb.GeneratedMessage {
   $core.bool hasChatType() => $_has(2);
   @$pb.TagNumber(3)
   void clearChatType() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.String get receiverId => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set receiverId($core.String value) => $_setString(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasReceiverId() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearReceiverId() => $_clearField(4);
 }
 
 /// cmd = 16: 消息撤回通知（服务端 → 客户端，推送给对方）
@@ -1729,7 +1753,7 @@ class RtcGroup extends $pb.GeneratedMessage {
     ..aOS(4, _omitFieldNames ? '' : 'payload')
     ..aOS(5, _omitFieldNames ? '' : 'callId', protoName: 'callId')
     ..aOS(6, _omitFieldNames ? '' : 'roomId', protoName: 'roomId')
-    ..aI(7, _omitFieldNames ? '' : 'mode', protoName: 'mode')
+    ..aI(7, _omitFieldNames ? '' : 'mode')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')

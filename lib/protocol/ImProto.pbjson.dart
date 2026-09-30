@@ -181,13 +181,15 @@ const ReadReceipt$json = {
   '2': [
     {'1': 'conversationId', '3': 1, '4': 1, '5': 9, '10': 'conversationId'},
     {'1': 'lastReadMsgId', '3': 2, '4': 1, '5': 9, '10': 'lastReadMsgId'},
+    {'1': 'receiverId', '3': 3, '4': 1, '5': 9, '10': 'receiverId'},
   ],
 };
 
 /// Descriptor for `ReadReceipt`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List readReceiptDescriptor = $convert.base64Decode(
     'CgtSZWFkUmVjZWlwdBImCg5jb252ZXJzYXRpb25JZBgBIAEoCVIOY29udmVyc2F0aW9uSWQSJA'
-    'oNbGFzdFJlYWRNc2dJZBgCIAEoCVINbGFzdFJlYWRNc2dJZA==');
+    'oNbGFzdFJlYWRNc2dJZBgCIAEoCVINbGFzdFJlYWRNc2dJZBIeCgpyZWNlaXZlcklkGAMgASgJ'
+    'UgpyZWNlaXZlcklk');
 
 @$core.Deprecated('Use msgRecallRequestDescriptor instead')
 const MsgRecallRequest$json = {
@@ -196,13 +198,15 @@ const MsgRecallRequest$json = {
     {'1': 'msgId', '3': 1, '4': 1, '5': 9, '10': 'msgId'},
     {'1': 'conversationId', '3': 2, '4': 1, '5': 9, '10': 'conversationId'},
     {'1': 'chatType', '3': 3, '4': 1, '5': 5, '10': 'chatType'},
+    {'1': 'receiverId', '3': 4, '4': 1, '5': 9, '10': 'receiverId'},
   ],
 };
 
 /// Descriptor for `MsgRecallRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List msgRecallRequestDescriptor = $convert.base64Decode(
     'ChBNc2dSZWNhbGxSZXF1ZXN0EhQKBW1zZ0lkGAEgASgJUgVtc2dJZBImCg5jb252ZXJzYXRpb2'
-    '5JZBgCIAEoCVIOY29udmVyc2F0aW9uSWQSGgoIY2hhdFR5cGUYAyABKAVSCGNoYXRUeXBl');
+    '5JZBgCIAEoCVIOY29udmVyc2F0aW9uSWQSGgoIY2hhdFR5cGUYAyABKAVSCGNoYXRUeXBlEh4K'
+    'CnJlY2VpdmVySWQYBCABKAlSCnJlY2VpdmVySWQ=');
 
 @$core.Deprecated('Use msgRecallNotifyDescriptor instead')
 const MsgRecallNotify$json = {

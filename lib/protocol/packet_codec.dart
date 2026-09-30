@@ -140,20 +140,23 @@ class PacketCodec {
     return create(Cmd.deliveryAck, sequence: Int64.ZERO, body: body);
   }
 
-  /// 构建已读回执 Packet
-  static proto.Packet buildReadReceipt(String conversationId, String lastReadMsgId) {
+  /// 构建已读回执 Packet（单聊必传 receiverId，服务端直接转发给对方；群聊留空）
+  static proto.Packet buildReadReceipt(String conversationId, String lastReadMsgId, {String receiverId = ''}) {
     final body = proto.ReadReceipt()
       ..conversationId = conversationId
-      ..lastReadMsgId = lastReadMsgId;
+      ..lastReadMsgId = lastReadMsgId
+      ..receiverId = receiverId;
     return create(Cmd.readReceipt, sequence: Int64.ZERO, body: body);
   }
 
-  /// 构建消息撤回请求 Packet
-  static proto.Packet buildMsgRecallReq(String msgId, String conversationId, int chatType, {String? requestId}) {
+  /// 构建消息撤回请求 Packet（单聊必传 receiverId，服务端直接推送撤回通知；群聊留空）
+  static proto.Packet buildMsgRecallReq(String msgId, String conversationId, int chatType,
+      {String? requestId, String receiverId = ''}) {
     final body = proto.MsgRecallRequest()
       ..msgId = msgId
       ..conversationId = conversationId
-      ..chatType = chatType;
+      ..chatType = chatType
+      ..receiverId = receiverId;
     return create(Cmd.msgRecallReq, sequence: Int64.ZERO, requestId: requestId, body: body);
   }
 
