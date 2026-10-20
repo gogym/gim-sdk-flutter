@@ -1,5 +1,7 @@
 # GIM IM SDK (Flutter)
 
+[**中文**](README.md) | [English](README.en.md)
+
 高性能、开箱即用的 **Flutter IM 即时通讯客户端 SDK**，基于 **TCP + Protobuf + Varint32 帧编码** 构建，与 [gim-sdk-java](https://github.com/gogym/gim-sdk-java) 服务端协议完全对齐，覆盖单聊、群聊、送达/已读/撤回、在线状态、好友/群组通知、心跳重连、多端互踢、WebRTC 1:1 通话与群视频（Mesh + SFU）等能力。
 
 A high-performance, production-ready Flutter IM **client** SDK built on **TCP + Protobuf**, aligned with the `gim-sdk-java` server. It covers 1:1 chat, group chat, delivery/read/recall, presence, friend & group notifications, heartbeat & auto-reconnect, multi-device kick, and WebRTC 1:1 / group calls (Mesh + SFU).
@@ -212,27 +214,27 @@ class MyImEventListener extends ImEventListener {
 }
 ```
 
-> 完整接入示例见 [`docs/SDK接入文档.md`](docs/SDK接入文档.md) 与 [Wiki 快速开始](wiki/快速开始.md)。
+> 完整接入示例见 [`docs/SDK接入文档.md`](docs/SDK接入文档.md) 与 [Wiki 快速开始](https://github.com/gogym/gim-sdk-flutter/wiki/快速开始)。
 
 ---
 
 ## 文档索引 / Documentation
 
-完整文档位于仓库 `wiki/` 目录：
+完整文档已发布到 GitHub Wiki（[中文](https://github.com/gogym/gim-sdk-flutter/wiki/Home) | [English](https://github.com/gogym/gim-sdk-flutter/wiki/Home-EN)）：
 
-- [Wiki 首页](wiki/Home.md)
-- [快速开始](wiki/快速开始.md)
-- [架构概览](wiki/架构概览.md)
-- [核心概念：Packet 与协议编解码](wiki/核心概念：Packet与协议编解码.md)
-- [核心概念：连接与认证](wiki/核心概念：连接与认证.md)
-- [核心概念：事件监听（ImEventListener）](wiki/核心概念：事件监听.md)
-- [消息能力：单聊与群聊](wiki/消息能力：单聊与群聊.md)
-- [消息能力：心跳与自动重连](wiki/消息能力：心跳与自动重连.md)
-- [消息能力：撤回、已读与在线状态](wiki/消息能力：撤回、已读与在线状态.md)
-- [WebRTC：1:1 通话](wiki/WebRTC：1对1通话.md)
-- [WebRTC：群视频通话（Mesh + SFU）](wiki/WebRTC：群视频通话.md)
-- [配置参考：ImConfig](wiki/配置参考：ImConfig.md)
-- [前后台与生命周期](wiki/前后台与生命周期.md)
+- [Wiki 首页](https://github.com/gogym/gim-sdk-flutter/wiki/Home)
+- [快速开始](https://github.com/gogym/gim-sdk-flutter/wiki/快速开始)
+- [架构概览](https://github.com/gogym/gim-sdk-flutter/wiki/架构概览)
+- [核心概念：Packet 与协议编解码](https://github.com/gogym/gim-sdk-flutter/wiki/核心概念：Packet与协议编解码)
+- [核心概念：连接与认证](https://github.com/gogym/gim-sdk-flutter/wiki/核心概念：连接与认证)
+- [核心概念：事件监听（ImEventListener）](https://github.com/gogym/gim-sdk-flutter/wiki/核心概念：事件监听)
+- [消息能力：单聊与群聊](https://github.com/gogym/gim-sdk-flutter/wiki/消息能力：单聊与群聊)
+- [消息能力：心跳与自动重连](https://github.com/gogym/gim-sdk-flutter/wiki/消息能力：心跳与自动重连)
+- [消息能力：撤回、已读与在线状态](https://github.com/gogym/gim-sdk-flutter/wiki/消息能力：撤回、已读与在线状态)
+- [WebRTC：1:1 通话](https://github.com/gogym/gim-sdk-flutter/wiki/WebRTC：1对1通话)
+- [WebRTC：群视频通话（Mesh + SFU）](https://github.com/gogym/gim-sdk-flutter/wiki/WebRTC：群视频通话)
+- [配置参考：ImConfig](https://github.com/gogym/gim-sdk-flutter/wiki/配置参考：ImConfig)
+- [前后台与生命周期](https://github.com/gogym/gim-sdk-flutter/wiki/前后台与生命周期)
 
 ---
 
